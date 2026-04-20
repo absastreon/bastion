@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.production
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+
+# Secrets & keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Next.js (Phase 3)
+.next/
+out/
+
+# Internal files (never commit)
+CLAUDE.md
+PROGRESS.md
+HANDOFF.md
+REGISTRY.md
+bastion-progress.json
+lessons.md
+packages/web/

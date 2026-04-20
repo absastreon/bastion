@@ -1,0 +1,8 @@
+{
+  "name": "secure-project",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "express-rate-limit": "^7.0.0"
+  }
+}

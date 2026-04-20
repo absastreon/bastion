@@ -1,0 +1,26 @@
+name: Bastion Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Bastion Scan
+        uses: ./.github/actions/bastion-scan
+        with:
+          path: '.'
+          format: 'json'
+          fail-on-critical: 'true'
+          node-version: '20'

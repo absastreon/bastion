@@ -1,0 +1,211 @@
+name: 'Bastion Security Scan'
+description: 'Privacy-first security checker for AI-era builders. Scans your project and reports findings on PRs.'
+author: 'Bastion'
+
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  path:
+    description: 'Path to project directory to scan'
+    required: false
+    default: '.'
+  format:
+    description: 'Output format (json, terminal, markdown)'
+    required: false
+    default: 'json'
+  fail-on-critical:
+    description: 'Fail the check if critical issues are found'
+    required: false
+    default: 'true'
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+
+outputs:
+  score:
+    description: 'Security score (0-100)'
+    value: ${{ steps.parse.outputs.score }}
+  total:
+    description: 'Total number of checks run'
+    value: ${{ steps.parse.outputs.total }}
+  passed:
+    description: 'Number of checks passed'
+    value: ${{ steps.parse.outputs.passed }}
+  failed:
+    description: 'Number of checks failed'
+    value: ${{ steps.parse.outputs.failed }}
+  critical-count:
+    description: 'Number of critical findings'
+    value: ${{ steps.parse.outputs.critical_count }}
+  has-critical:
+    description: 'Whether critical issues were found (true/false)'
+    value: ${{ steps.parse.outputs.has_critical }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install Bastion CLI
+      shell: bash
+      run: npm install -g @bastion/cli@latest
+
+    - name: Run Bastion Scan
+      id: scan
+      shell: bash
+      run: |
+        set +e
+        SCAN_OUTPUT=$(bastion scan --path "${{ inputs.path }}" --format json 2>/dev/null)
+        SCAN_EXIT=$?
+        set -e
+
+        # Save raw JSON output
+        echo "$SCAN_OUTPUT" > "$RUNNER_TEMP/bastion-results.json"
+
+        # Store for subsequent steps
+        EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
+        echo "json<<${EOF_MARKER}" >> "$GITHUB_OUTPUT"
+        echo "$SCAN_OUTPUT" >> "$GITHUB_OUTPUT"
+        echo "${EOF_MARKER}" >> "$GITHUB_OUTPUT"
+
+    - name: Parse Results
+      id: parse
+      shell: bash
+      run: |
+        RESULTS_FILE="$RUNNER_TEMP/bastion-results.json"
+
+        if [ ! -f "$RESULTS_FILE" ] || [ ! -s "$RESULTS_FILE" ]; then
+          echo "score=0" >> "$GITHUB_OUTPUT"
+          echo "total=0" >> "$GITHUB_OUTPUT"
+          echo "passed=0" >> "$GITHUB_OUTPUT"
+          echo "failed=0" >> "$GITHUB_OUTPUT"
+          echo "critical_count=0" >> "$GITHUB_OUTPUT"
+          echo "has_critical=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::Bastion scan produced no output"
+          exit 0
+        fi
+
+        SCORE=$(jq -r '.score // 0' "$RESULTS_FILE")
+        TOTAL=$(jq -r '.summary.total // 0' "$RESULTS_FILE")
+        PASSED=$(jq -r '.summary.pass // 0' "$RESULTS_FILE")
+        FAILED=$(jq -r '.summary.fail // 0' "$RESULTS_FILE")
+        WARNED=$(jq -r '.summary.warn // 0' "$RESULTS_FILE")
+
+        # Count critical findings
+        CRITICAL_COUNT=$(jq '[.results[] | select(.status == "fail" and .severity == "critical")] | length' "$RESULTS_FILE")
+
+        echo "score=${SCORE}" >> "$GITHUB_OUTPUT"
+        echo "total=${TOTAL}" >> "$GITHUB_OUTPUT"
+        echo "passed=${PASSED}" >> "$GITHUB_OUTPUT"
+        echo "failed=${FAILED}" >> "$GITHUB_OUTPUT"
+        echo "warned=${WARNED}" >> "$GITHUB_OUTPUT"
+        echo "critical_count=${CRITICAL_COUNT}" >> "$GITHUB_OUTPUT"
+
+        if [ "$CRITICAL_COUNT" -gt 0 ]; then
+          echo "has_critical=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has_critical=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Post PR Comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const resultsPath = `${process.env.RUNNER_TEMP}/bastion-results.json`;
+
+          let results;
+          try {
+            results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+          } catch {
+            core.warning('Could not read Bastion results for PR comment');
+            return;
+          }
+
+          const score = results.score ?? 0;
+          const total = results.summary?.total ?? 0;
+          const passed = results.summary?.pass ?? 0;
+          const failed = results.summary?.fail ?? 0;
+          const warned = results.summary?.warn ?? 0;
+
+          const criticals = (results.results ?? []).filter(
+            r => r.status === 'fail' && r.severity === 'critical'
+          );
+          const highs = (results.results ?? []).filter(
+            r => r.status === 'fail' && r.severity === 'high'
+          );
+
+          // Score emoji
+          const scoreEmoji = score >= 80 ? '🟢' : score >= 50 ? '🟡' : '🔴';
+          const verdict = failed === 0 ? '✅ All checks passed' : `⚠️ ${failed} issue(s) found`;
+
+          let body = `## 🛡️ Bastion Security Scan\n\n`;
+          body += `${scoreEmoji} **Score: ${score}/100** — ${verdict}\n\n`;
+          body += `| Metric | Count |\n|--------|-------|\n`;
+          body += `| ✅ Passed | ${passed} |\n`;
+          body += `| ❌ Failed | ${failed} |\n`;
+          body += `| ⚠️ Warnings | ${warned} |\n`;
+          body += `| Total Checks | ${total} |\n\n`;
+
+          if (criticals.length > 0) {
+            body += `### 🚨 Critical Findings\n\n`;
+            for (const finding of criticals) {
+              body += `- **${finding.id}**: ${finding.message}`;
+              if (finding.location) body += ` (\`${finding.location}\`)`;
+              body += `\n`;
+            }
+            body += `\n`;
+          }
+
+          if (highs.length > 0) {
+            body += `### ⚠️ High Severity Findings\n\n`;
+            for (const finding of highs) {
+              body += `- **${finding.id}**: ${finding.message}`;
+              if (finding.location) body += ` (\`${finding.location}\`)`;
+              body += `\n`;
+            }
+            body += `\n`;
+          }
+
+          body += `---\n*🛡️ [Bastion](https://github.com/ABS-Projects-2026/Bastion) — Privacy-first security for AI-era builders*`;
+
+          // Find and update existing comment, or create new one
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const botComment = comments.find(
+            c => c.body?.includes('Bastion Security Scan')
+          );
+
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+          }
+
+    - name: Check for Critical Failures
+      if: inputs.fail-on-critical == 'true' && steps.parse.outputs.has_critical == 'true'
+      shell: bash
+      run: |
+        echo "::error::Bastion found ${{ steps.parse.outputs.critical_count }} critical security issue(s). Fix them before merging."
+        exit 1
