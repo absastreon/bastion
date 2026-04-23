@@ -21,16 +21,18 @@ function makeReport(results: readonly CheckResult[], score?: number): ScanReport
   let fail = 0;
   let warn = 0;
   let skip = 0;
+  let notApplicable = 0;
   for (const r of results) {
     if (r.status === 'pass') pass++;
     else if (r.status === 'fail') fail++;
     else if (r.status === 'warn') warn++;
+    else if (r.status === 'not-applicable') notApplicable++;
     else skip++;
   }
   return {
     results,
     score: score ?? 100,
-    summary: { pass, fail, warn, skip, checksRun: pass + fail + warn, total: results.length },
+    summary: { pass, fail, warn, skip, notApplicable, checksRun: pass + fail + warn, total: results.length },
     duration: 42,
   };
 }
@@ -78,6 +80,7 @@ describe('formatJsonReport', () => {
       fail: 1,
       warn: 1,
       skip: 1,
+      notApplicable: 0,
       checksRun: 4,
       total: 5,
     });
@@ -157,6 +160,23 @@ describe('formatJsonReport', () => {
     const meta: JsonReportMetadata = { ...defaultMetadata, detectedStack: fullStack };
     const parsed = JSON.parse(formatJsonReport(makeReport([]), meta));
     expect(parsed.metadata.detectedStack).toEqual(fullStack);
+  });
+
+  it('includes projectType in metadata when provided', () => {
+    const meta: JsonReportMetadata = {
+      ...defaultMetadata,
+      projectType: 'static',
+      projectTypeSource: 'auto',
+    };
+    const parsed = JSON.parse(formatJsonReport(makeReport([]), meta));
+    expect(parsed.metadata.projectType).toBe('static');
+    expect(parsed.metadata.projectTypeSource).toBe('auto');
+  });
+
+  it('includes not-applicable status in results', () => {
+    const result = makeResult({ status: 'not-applicable', name: 'Rate limiting' });
+    const parsed = JSON.parse(formatJsonReport(makeReport([result]), defaultMetadata));
+    expect(parsed.results[0].status).toBe('not-applicable');
   });
 
   it('returns results array matching input order', () => {

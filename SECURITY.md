@@ -4,7 +4,8 @@
 
 If you discover a security vulnerability in Bastion, please report it responsibly.
 
-**Preferred:** [GitHub Security Advisories](https://github.com/ABS-Projects-2026/Bastion/security/advisories/new)
+**Email:** [BastionApp@proton.me](mailto:BastionApp@proton.me)
+**Preferred:** [GitHub Security Advisories](https://github.com/absastreon/bastion/security/advisories/new)
 
 We will acknowledge your report within 48 hours and aim to release a fix within 7 days for critical issues.
 

@@ -25,16 +25,18 @@ function makeReport(results: readonly CheckResult[], score?: number): ScanReport
   let fail = 0;
   let warn = 0;
   let skip = 0;
+  let notApplicable = 0;
   for (const r of results) {
     if (r.status === 'pass') pass++;
     else if (r.status === 'fail') fail++;
     else if (r.status === 'warn') warn++;
+    else if (r.status === 'not-applicable') notApplicable++;
     else skip++;
   }
   return {
     results,
     score: score ?? 100,
-    summary: { pass, fail, warn, skip, checksRun: pass + fail + warn, total: results.length },
+    summary: { pass, fail, warn, skip, notApplicable, checksRun: pass + fail + warn, total: results.length },
     duration: 42,
   };
 }
@@ -49,6 +51,8 @@ function makeContext(overrides: Partial<ScanContext> = {}): ScanContext {
     },
     files: ['src/index.ts', 'package.json'],
     verbose: false,
+    projectType: 'unknown',
+    projectTypeSource: 'auto',
     ...overrides,
   };
 }

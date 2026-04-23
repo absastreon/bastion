@@ -362,6 +362,8 @@ describe('rateLimitCheck — integration', () => {
       stack,
       files: fileList,
       verbose: false,
+      projectType: 'unknown',
+      projectTypeSource: 'auto',
     };
 
     return rateLimitCheck(context);
@@ -507,6 +509,8 @@ describe('rateLimitCheck — integration', () => {
       stack: { language: 'typescript', dependencies: [] },
       files: [],
       verbose: false,
+      projectType: 'unknown',
+      projectTypeSource: 'auto',
     };
     await rm(testDir, { recursive: true, force: true });
     await mkdir(testDir, { recursive: true });
@@ -569,6 +573,8 @@ describe('rateLimitCheck — integration', () => {
       stack: { language: 'typescript', dependencies: [] },
       files: ['src/ghost.ts'],
       verbose: false,
+      projectType: 'unknown',
+      projectTypeSource: 'auto',
     };
     await rm(testDir, { recursive: true, force: true });
     await mkdir(testDir, { recursive: true });

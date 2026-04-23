@@ -2,7 +2,7 @@
  * CLI program setup — Commander.js configuration
  * Separated from index.ts for testability
  */
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { OUTPUT_FORMATS } from '@bastion/shared';
@@ -21,6 +21,7 @@ interface RawScanOptions {
   readonly output?: string;
   readonly generateConfigs?: boolean;
   readonly outputDir?: string;
+  readonly type: 'auto' | 'static' | 'api' | 'fullstack';
 }
 
 /** Create and configure the Bastion CLI program */
@@ -42,6 +43,11 @@ export function createProgram(version: string): Command {
     .option('-o, --output <file>', 'output file path (for markdown/json formats)')
     .option('--generate-configs', 'generate security config snippets for detected stack', false)
     .option('--output-dir <dir>', 'write generated config files to directory')
+    .addOption(
+      new Option('-t, --type <type>', 'project type override')
+        .choices(['auto', 'static', 'api', 'fullstack'])
+        .default('auto'),
+    )
     .action(async (options: RawScanOptions) => {
       await runScan(options, version);
     });
@@ -88,6 +94,9 @@ async function runScan(options: RawScanOptions, version: string): Promise<void> 
     if (options.url) {
       console.log(chalk.dim(`  URL:    ${options.url}`));
     }
+    if (options.type !== 'auto') {
+      console.log(chalk.dim(`  Type:   ${options.type} (manual override)`));
+    }
     console.log();
   }
 
@@ -98,6 +107,7 @@ async function runScan(options: RawScanOptions, version: string): Promise<void> 
       path: options.path,
       url: options.url,
       verbose: options.verbose,
+      type: options.type,
     });
 
     const report = await scan(context);
@@ -108,6 +118,8 @@ async function runScan(options: RawScanOptions, version: string): Promise<void> 
         version,
         projectPath: context.projectPath,
         detectedStack: context.stack,
+        projectType: report.projectType,
+        projectTypeSource: report.projectTypeSource,
       };
       console.log(formatJsonReport(report, metadata));
     } else {
@@ -115,6 +127,13 @@ async function runScan(options: RawScanOptions, version: string): Promise<void> 
       if (report.urlOnly) {
         console.log(chalk.yellow('\n  URL-only scan — 6 HTTP checks performed.'));
         console.log(chalk.dim('  Point --path at your source code for a full 15-check audit.\n'));
+      }
+      if (report.projectType && report.projectType !== 'unknown') {
+        const source = report.projectTypeSource === 'manual' ? 'manual' : 'auto-detected';
+        console.log(chalk.dim(`\n  Project type: ${report.projectType} (${source})`));
+      }
+      if (report.projectType === 'static' && report.summary.notApplicable > 0) {
+        console.log(chalk.dim(`  Static site detected — ${report.summary.notApplicable} checks not applicable`));
       }
       console.log(formatTerminalReport(report, options.verbose));
     }

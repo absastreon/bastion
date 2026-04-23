@@ -8,6 +8,7 @@ import type { CheckResult, ScanReport } from '@bastion/shared';
 function resultIcon(result: CheckResult): string {
   if (result.status === 'pass') return chalk.green('✓');
   if (result.status === 'skip') return chalk.dim('–');
+  if (result.status === 'not-applicable') return chalk.dim('○');
   if (result.status === 'warn') return chalk.yellow('⚠');
 
   switch (result.severity) {
@@ -74,6 +75,10 @@ export function formatTerminalReport(
     lines.push('');
 
     for (const r of results) {
+      if (r.status === 'not-applicable') {
+        lines.push(`    ${resultIcon(r)} ${chalk.dim(`${r.name} — not applicable (static site)`)}`);
+        continue;
+      }
       const loc = r.location ? chalk.dim(` ${r.location}`) : '';
       lines.push(`    ${resultIcon(r)} ${r.name}${loc}`);
       lines.push(`      ${chalk.dim(r.description)}`);
@@ -87,12 +92,16 @@ export function formatTerminalReport(
     }
   }
 
-  const { pass, fail, warn, skip, checksRun, total } = report.summary;
+  const { pass, fail, warn, skip, notApplicable, checksRun, total } = report.summary;
 
   lines.push('');
-  lines.push(
-    `  ${pass} passed · ${fail} failed · ${warn} warnings · ${skip} skipped · Score: ${formatScore(report.score)} (based on ${checksRun} of ${total} checks)`,
-  );
+
+  const parts = [`${pass} passed`, `${fail} failed`, `${warn} warnings`, `${skip} skipped`];
+  if (notApplicable > 0) {
+    parts.push(`${notApplicable} N/A`);
+  }
+  parts.push(`Score: ${formatScore(report.score)} (based on ${checksRun} of ${total} checks)`);
+  lines.push(`  ${parts.join(' · ')}`);
 
   if (skip > 0 && skip > total / 2) {
     lines.push(

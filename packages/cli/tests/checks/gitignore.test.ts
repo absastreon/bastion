@@ -15,6 +15,8 @@ function makeContext(projectPath: string): ScanContext {
     stack: { language: 'javascript' },
     files: [],
     verbose: false,
+    projectType: 'unknown',
+    projectTypeSource: 'auto',
   };
 }
 

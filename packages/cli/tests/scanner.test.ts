@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateScore, summarizeResults, runChecks } from '../src/scanner.js';
+import { calculateScore, summarizeResults, runChecks, detectProjectType } from '../src/scanner.js';
 import type { CheckFunction, CheckResult, ScanContext } from '@bastion/shared';
 
 /** Minimal context for unit tests — no filesystem needed */
@@ -8,6 +8,8 @@ const mockContext: ScanContext = {
   stack: { language: 'javascript' },
   files: [],
   verbose: false,
+  projectType: 'unknown',
+  projectTypeSource: 'auto',
 };
 
 /** Helper: build a CheckResult with sensible defaults */
@@ -83,6 +85,26 @@ describe('calculateScore', () => {
     expect(calculateScore(results)).toBe(100);
   });
 
+  it('excludes not-applicable checks from score calculation', () => {
+    // 2 pass, 1 fail, 2 not-applicable → 2/3 = 67% (N/A ignored)
+    const results = [
+      makeResult({ status: 'pass' }),
+      makeResult({ status: 'pass' }),
+      makeResult({ status: 'fail', severity: 'high' }),
+      makeResult({ status: 'not-applicable' }),
+      makeResult({ status: 'not-applicable' }),
+    ];
+    expect(calculateScore(results)).toBe(67);
+  });
+
+  it('returns 100 when only not-applicable checks exist', () => {
+    const results = [
+      makeResult({ status: 'not-applicable' }),
+      makeResult({ status: 'not-applicable' }),
+    ];
+    expect(calculateScore(results)).toBe(100);
+  });
+
   it('floors at 0 when all checks fail', () => {
     const results = Array.from({ length: 5 }, () =>
       makeResult({ status: 'fail', severity: 'critical' }),
@@ -97,7 +119,7 @@ describe('calculateScore', () => {
 
 describe('summarizeResults', () => {
   it('returns zeros for empty array', () => {
-    expect(summarizeResults([])).toEqual({ pass: 0, fail: 0, warn: 0, skip: 0, checksRun: 0, total: 0 });
+    expect(summarizeResults([])).toEqual({ pass: 0, fail: 0, warn: 0, skip: 0, notApplicable: 0, checksRun: 0, total: 0 });
   });
 
   it('counts each status correctly', () => {
@@ -108,7 +130,16 @@ describe('summarizeResults', () => {
       makeResult({ status: 'warn' }),
       makeResult({ status: 'skip' }),
     ];
-    expect(summarizeResults(results)).toEqual({ pass: 2, fail: 1, warn: 1, skip: 1, checksRun: 4, total: 5 });
+    expect(summarizeResults(results)).toEqual({ pass: 2, fail: 1, warn: 1, skip: 1, notApplicable: 0, checksRun: 4, total: 5 });
+  });
+
+  it('counts not-applicable results separately', () => {
+    const results = [
+      makeResult({ status: 'pass' }),
+      makeResult({ status: 'not-applicable' }),
+      makeResult({ status: 'not-applicable' }),
+    ];
+    expect(summarizeResults(results)).toEqual({ pass: 1, fail: 0, warn: 0, skip: 0, notApplicable: 2, checksRun: 1, total: 3 });
   });
 });
 
@@ -206,5 +237,72 @@ describe('runChecks', () => {
 
     const report = await runChecks(mockContext, [slow]);
     expect(report.duration).toBeGreaterThanOrEqual(40);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// detectProjectType
+// ---------------------------------------------------------------------------
+
+describe('detectProjectType', () => {
+  it('returns static for no package.json and no code files', () => {
+    expect(detectProjectType(undefined, ['index.html', 'style.css'])).toBe('static');
+  });
+
+  it('returns static for no package.json and no files at all', () => {
+    expect(detectProjectType(undefined, [])).toBe('static');
+  });
+
+  it('returns unknown for code files but no package.json', () => {
+    expect(detectProjectType(undefined, ['app.js', 'utils.ts'])).toBe('unknown');
+  });
+
+  it('returns api for server files without package.json', () => {
+    expect(detectProjectType(undefined, ['server.ts', 'app.js'])).toBe('api');
+  });
+
+  it('returns static for package.json with no server deps', () => {
+    const pkg = { dependencies: { tailwindcss: '^3.0.0' }, devDependencies: { typescript: '^5.0.0' } };
+    expect(detectProjectType(pkg, ['index.html', 'style.css'])).toBe('static');
+  });
+
+  it('returns fullstack for Next.js projects', () => {
+    const pkg = { dependencies: { next: '^14.0.0', react: '^18.0.0' } };
+    expect(detectProjectType(pkg, ['src/app/page.tsx'])).toBe('fullstack');
+  });
+
+  it('returns fullstack for Nuxt projects', () => {
+    const pkg = { dependencies: { nuxt: '^3.0.0' } };
+    expect(detectProjectType(pkg, ['pages/index.vue'])).toBe('fullstack');
+  });
+
+  it('returns api for Express-only projects', () => {
+    const pkg = { dependencies: { express: '^4.0.0' } };
+    expect(detectProjectType(pkg, ['src/index.ts', 'src/middleware.ts'])).toBe('api');
+  });
+
+  it('returns fullstack for Express with frontend files', () => {
+    const pkg = { dependencies: { express: '^4.0.0' } };
+    expect(detectProjectType(pkg, ['src/server.ts', 'public/app.tsx'])).toBe('fullstack');
+  });
+
+  it('returns api for Fastify projects without frontend', () => {
+    const pkg = { dependencies: { fastify: '^4.0.0' } };
+    expect(detectProjectType(pkg, ['src/routes.ts'])).toBe('api');
+  });
+
+  it('returns static when package.json has only devDependencies and no server code', () => {
+    const pkg = { devDependencies: { prettier: '^3.0.0', eslint: '^8.0.0' } };
+    expect(detectProjectType(pkg, ['README.md', 'index.html'])).toBe('static');
+  });
+
+  it('detects api from api/ directory in files', () => {
+    const pkg = { dependencies: {} };
+    expect(detectProjectType(pkg, ['src/api/users.ts'])).toBe('api');
+  });
+
+  it('detects api from routes/ directory in files', () => {
+    const pkg = { dependencies: {} };
+    expect(detectProjectType(pkg, ['routes/index.ts'])).toBe('api');
   });
 });

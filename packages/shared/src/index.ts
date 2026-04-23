@@ -8,6 +8,7 @@ export { OUTPUT_FORMATS } from './types.js';
 export type {
   Severity,
   OutputFormat,
+  ProjectType,
   ScanOptions,
   DetectedStack,
   ScanContext,

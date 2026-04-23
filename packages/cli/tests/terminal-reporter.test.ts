@@ -31,16 +31,18 @@ function makeReport(results: readonly CheckResult[], score?: number): ScanReport
   let fail = 0;
   let warn = 0;
   let skip = 0;
+  let notApplicable = 0;
   for (const r of results) {
     if (r.status === 'pass') pass++;
     else if (r.status === 'fail') fail++;
     else if (r.status === 'warn') warn++;
+    else if (r.status === 'not-applicable') notApplicable++;
     else skip++;
   }
   return {
     results,
     score: score ?? 100,
-    summary: { pass, fail, warn, skip, checksRun: pass + fail + warn, total: results.length },
+    summary: { pass, fail, warn, skip, notApplicable, checksRun: pass + fail + warn, total: results.length },
     duration: 42,
   };
 }
@@ -191,6 +193,44 @@ describe('formatTerminalReport', () => {
     expect(output).toContain('Score may not be representative');
     expect(output).toContain('5 checks could not run');
     expect(output).toContain('Pass --url to enable HTTP checks');
+  });
+
+  it('renders not-applicable checks with distinct styling', () => {
+    const output = strip(
+      formatTerminalReport(
+        makeReport([
+          makeResult({ status: 'not-applicable', name: 'Rate limiting' }),
+          makeResult({ status: 'pass', name: 'Gitignore' }),
+        ]),
+        false,
+      ),
+    );
+    expect(output).toContain('○');
+    expect(output).toContain('Rate limiting — not applicable (static site)');
+  });
+
+  it('shows N/A count in summary when not-applicable checks exist', () => {
+    const output = strip(
+      formatTerminalReport(
+        makeReport([
+          makeResult({ status: 'pass' }),
+          makeResult({ status: 'not-applicable' }),
+          makeResult({ status: 'not-applicable' }),
+        ]),
+        false,
+      ),
+    );
+    expect(output).toContain('2 N/A');
+  });
+
+  it('does not show N/A in summary when no not-applicable checks', () => {
+    const output = strip(
+      formatTerminalReport(
+        makeReport([makeResult({ status: 'pass' })]),
+        false,
+      ),
+    );
+    expect(output).not.toContain('N/A');
   });
 
   it('does not show skip note when fewer than half are skipped', () => {

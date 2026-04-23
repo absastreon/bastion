@@ -456,6 +456,8 @@ describe('corsCheck — integration', () => {
       stack: makeStack(framework),
       files: fileList,
       verbose: false,
+      projectType: 'unknown',
+      projectTypeSource: 'auto',
     };
 
     return corsCheck(context);

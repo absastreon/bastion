@@ -44,3 +44,20 @@ export function getAllChecks(): readonly CheckFunction[] {
 export function getUrlOnlyChecks(): readonly CheckFunction[] {
   return [headersCheck, sslCheck, securityTxtUrlCheck, cookieCheck, serverDisclosureCheck, dmarcCheck];
 }
+
+/** Metadata for a check that can be skipped for static sites */
+export interface StaticSiteSkipInfo {
+  readonly fn: CheckFunction;
+  readonly id: string;
+  readonly name: string;
+}
+
+/** Checks not applicable to static sites (no server-side code) */
+export function getStaticSiteSkippableChecks(): readonly StaticSiteSkipInfo[] {
+  return [
+    { fn: rateLimitCheck, id: 'rate-limit', name: 'Rate limiting' },
+    { fn: authCheck, id: 'auth', name: 'Authentication' },
+    { fn: corsCheck, id: 'cors', name: 'CORS configuration' },
+    { fn: envExampleCheck, id: 'env-example', name: '.env.example exists' },
+  ];
+}

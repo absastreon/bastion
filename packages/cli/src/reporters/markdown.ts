@@ -41,6 +41,11 @@ export function formatMarkdownReport(
     appendPassedChecks(lines, passes);
   }
 
+  const notApplicable = report.results.filter((r) => r.status === 'not-applicable');
+  if (notApplicable.length > 0) {
+    appendNotApplicableChecks(lines, notApplicable);
+  }
+
   appendRecommendations(lines, report);
   appendFooter(lines, version);
 
@@ -154,6 +159,17 @@ function appendPassedChecks(lines: string[], passes: readonly CheckResult[]): vo
   lines.push('');
   for (const r of passes) {
     lines.push(`- ✓ **${r.name}** — ${r.description}`);
+  }
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+}
+
+function appendNotApplicableChecks(lines: string[], results: readonly CheckResult[]): void {
+  lines.push('## Not Applicable');
+  lines.push('');
+  for (const r of results) {
+    lines.push(`- ○ **${r.name}** — ${r.description}`);
   }
   lines.push('');
   lines.push('---');

@@ -423,6 +423,8 @@ describe('codePatternCheck — integration', () => {
       stack,
       files: fileList,
       verbose: false,
+      projectType: 'unknown',
+      projectTypeSource: 'auto',
     };
 
     return codePatternCheck(context);

@@ -23,6 +23,8 @@ const baseContext: ScanContext = {
   packageJson: { name: 'test-project' },
   files: [],
   verbose: false,
+  projectType: 'unknown',
+  projectTypeSource: 'auto',
 };
 
 /** Build npm audit JSON output string */

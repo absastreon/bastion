@@ -1,7 +1,7 @@
 /**
  * JSON reporter — machine-readable output for CI/CD integration
  */
-import type { CheckResult, DetectedStack, ScanReport } from '@bastion/shared';
+import type { CheckResult, DetectedStack, ProjectType, ScanReport } from '@bastion/shared';
 
 /** Metadata included in JSON report output */
 export interface JsonReportMetadata {
@@ -9,6 +9,8 @@ export interface JsonReportMetadata {
   readonly version: string;
   readonly projectPath: string;
   readonly detectedStack: DetectedStack;
+  readonly projectType?: ProjectType;
+  readonly projectTypeSource?: 'auto' | 'manual';
 }
 
 /** Map a CheckResult to the public JSON schema */

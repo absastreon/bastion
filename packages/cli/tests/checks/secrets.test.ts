@@ -331,6 +331,8 @@ describe('secretsCheck — integration', () => {
       stack: { language: 'javascript' },
       files: fileList,
       verbose: false,
+      projectType: 'unknown',
+      projectTypeSource: 'auto',
     };
 
     return secretsCheck(context);

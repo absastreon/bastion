@@ -46,6 +46,7 @@ describe('scan command options', () => {
     expect(opts['format']).toBe('terminal');
     expect(opts['verbose']).toBe(false);
     expect(opts['url']).toBeUndefined();
+    expect(opts['type']).toBe('auto');
   });
 
   it('parses --path option', () => {
@@ -103,5 +104,21 @@ describe('scan command options', () => {
     expect(opts['format']).toBe('markdown');
     expect(opts['verbose']).toBe(true);
     expect(opts['url']).toBe('https://example.com');
+  });
+
+  it('parses --type option with valid choices', () => {
+    expect(parseScanOptions(['scan', '--type', 'static'])['type']).toBe('static');
+    expect(parseScanOptions(['scan', '--type', 'api'])['type']).toBe('api');
+    expect(parseScanOptions(['scan', '--type', 'fullstack'])['type']).toBe('fullstack');
+    expect(parseScanOptions(['scan', '--type', 'auto'])['type']).toBe('auto');
+  });
+
+  it('parses -t short option for type', () => {
+    const opts = parseScanOptions(['scan', '-t', 'static']);
+    expect(opts['type']).toBe('static');
+  });
+
+  it('rejects invalid --type values', () => {
+    expect(() => parseScanOptions(['scan', '--type', 'invalid'])).toThrow();
   });
 });

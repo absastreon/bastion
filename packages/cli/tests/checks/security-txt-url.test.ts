@@ -10,6 +10,8 @@ function makeContext(overrides: Partial<ScanContext> = {}): ScanContext {
     stack: { language: 'javascript' },
     files: [],
     verbose: false,
+    projectType: 'unknown',
+    projectTypeSource: 'auto',
     ...overrides,
   };
 }

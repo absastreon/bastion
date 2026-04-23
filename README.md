@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/ABS-Projects-2026/Bastion/ci.yml?branch=main&style=flat-square" />
+  <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/absastreon/bastion/ci.yml?branch=main&style=flat-square" />
   <img alt="Tests" src="https://img.shields.io/badge/tests-744%20passing-brightgreen?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
   <img alt="npm" src="https://img.shields.io/npm/v/@bastion/cli?style=flat-square" />
@@ -169,7 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ABS-Projects-2026/bastion-action@v1
+      - uses: absastreon/bastion-action@v1
         with:
           path: '.'
           fail-on: 'critical'    # Block PRs with critical findings
@@ -232,4 +232,4 @@ MIT - see [LICENSE](LICENSE) for details.
 - [CLI Documentation](https://bastion.dev/docs)
 - [Stack Playbooks](docs/playbooks/)
 - [OWASP Top 10 2025](https://owasp.org/Top10/2025/)
-- [Report a Bug](https://github.com/ABS-Projects-2026/Bastion/issues)
+- [Report a Bug](https://github.com/absastreon/bastion/issues)

@@ -8,6 +8,9 @@ export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 /** Output format for scan results */
 export type OutputFormat = 'terminal' | 'json' | 'markdown';
 
+/** Project type for static-site detection and check filtering */
+export type ProjectType = 'static' | 'api' | 'fullstack' | 'unknown';
+
 /** Valid output formats — runtime array matching OutputFormat type */
 export const OUTPUT_FORMATS: readonly OutputFormat[] = ['terminal', 'json', 'markdown'];
 
@@ -38,13 +41,17 @@ export interface ScanContext {
   readonly packageJson?: Record<string, unknown>;
   readonly files: readonly string[];
   readonly verbose: boolean;
+  /** Detected or manually specified project type */
+  readonly projectType: ProjectType;
+  /** Whether the project type was auto-detected or manually set */
+  readonly projectTypeSource: 'auto' | 'manual';
 }
 
 /** Result from a single check module */
 export interface CheckResult {
   readonly id: string;
   readonly name: string;
-  readonly status: 'pass' | 'fail' | 'warn' | 'skip';
+  readonly status: 'pass' | 'fail' | 'warn' | 'skip' | 'not-applicable';
   readonly severity: Severity;
   readonly category?: string;
   readonly location?: string;
@@ -62,6 +69,7 @@ export interface ScanSummary {
   readonly fail: number;
   readonly warn: number;
   readonly skip: number;
+  readonly notApplicable: number;
   readonly checksRun: number;
   readonly total: number;
 }
@@ -74,6 +82,10 @@ export interface ScanReport {
   readonly duration: number;
   /** True when only HTTP checks ran (no project files detected) */
   readonly urlOnly?: boolean;
+  /** Detected or manually specified project type */
+  readonly projectType?: ProjectType;
+  /** Whether the project type was auto-detected or manually set */
+  readonly projectTypeSource?: 'auto' | 'manual';
 }
 
 /** A generated security configuration snippet */

@@ -17,6 +17,8 @@ function makeContext(overrides: Partial<ScanContext> = {}): ScanContext {
     stack: { language: 'typescript' },
     files: [],
     verbose: false,
+    projectType: 'unknown',
+    projectTypeSource: 'auto',
     ...overrides,
   };
 }

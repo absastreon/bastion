@@ -13,6 +13,8 @@ function makeContext(files: readonly string[]): ScanContext {
     stack: { language: 'javascript' },
     files,
     verbose: false,
+    projectType: 'unknown',
+    projectTypeSource: 'auto',
   };
 }
 
