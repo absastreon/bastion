@@ -1,6 +1,7 @@
 {
-  "name": "@bastion/cli",
+  "name": "bastion-scan",
   "version": "0.1.0",
+  "description": "Privacy-first security checker for web projects. 15 checks, zero data uploaded, actionable fixes.",
   "type": "module",
   "bin": {
     "bastion": "./dist/index.js"
@@ -12,8 +13,25 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "keywords": [
+    "security",
+    "scanner",
+    "cli",
+    "owasp",
+    "privacy",
+    "devtools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/absastreon/bastion.git"
+  },
+  "homepage": "https://bastion.wiki",
+  "author": "ABS Astreon",
+  "license": "MIT",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch"

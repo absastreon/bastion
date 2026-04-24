@@ -203,7 +203,7 @@ function appendRecommendations(lines: string[], report: ScanReport): void {
     }
   }
 
-  lines.push(`${findings.length === 0 ? 2 : (hasCritical ? 1 : 0) + (hasHigh ? 1 : 0) + (hasMedium ? 1 : 0) + 1}. Run \`npx bastion scan\` regularly to catch new issues early`);
+  lines.push(`${findings.length === 0 ? 2 : (hasCritical ? 1 : 0) + (hasHigh ? 1 : 0) + (hasMedium ? 1 : 0) + 1}. Run \`npx bastion-scan scan\` regularly to catch new issues early`);
   lines.push('');
   lines.push('---');
   lines.push('');

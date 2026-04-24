@@ -54,7 +54,7 @@ const API_KEY = 'sk-test-xxxxxxxxxxxxxxxxxxxx';
 **How to check:**
 1. Search for strings like `password`, `secret`, `key`, `token` in your source files
 2. Look for `TODO`, `CHANGE`, `REPLACE`, `FIXME` near credentials
-3. Run `npx bastion scan` — it detects hardcoded secret patterns
+3. Run `npx bastion-scan scan` — it detects hardcoded secret patterns
 
 **Fix:** Move all secrets to environment variables:
 
@@ -127,7 +127,7 @@ app.post('/api/convert', (req, res) => {
 **How to check:**
 1. Search for `eval(`, `new Function(`, `exec(`, `execSync(`, `spawn(`
 2. If any of these use user input, they're critical vulnerabilities
-3. Run `npx bastion scan` — it detects these patterns automatically
+3. Run `npx bastion-scan scan` — it detects these patterns automatically
 
 **Fix:** Use safe alternatives. For math: a parser library. For shell commands: `execFile` with explicit args (no string interpolation).
 
@@ -217,7 +217,7 @@ Run through this before every deploy:
 - [ ] Rate limiting is enabled on all public endpoints
 - [ ] Error responses don't include stack traces
 - [ ] `npm audit` shows no critical or high vulnerabilities
-- [ ] Run `npx bastion scan` — score 80+
+- [ ] Run `npx bastion-scan scan` — score 80+
 
 ---
 
