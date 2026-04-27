@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { ScanContext } from '@bastion/shared';
+import type { ScanContext } from 'bastion-shared';
 import securityTxtCheck from '../../src/checks/security-txt.js';
 
 /** Create a minimal ScanContext with overrides */

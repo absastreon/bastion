@@ -8,7 +8,7 @@ import {
   RATE_LIMIT_PACKAGES,
 } from '../../src/checks/rate-limit.js';
 import rateLimitCheck from '../../src/checks/rate-limit.js';
-import type { ScanContext, DetectedStack } from '@bastion/shared';
+import type { ScanContext, DetectedStack } from 'bastion-shared';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';

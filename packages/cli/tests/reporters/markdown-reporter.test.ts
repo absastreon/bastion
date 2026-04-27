@@ -3,7 +3,7 @@ import { mkdir, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { formatMarkdownReport, writeMarkdownReport } from '../../src/reporters/markdown.js';
-import type { CheckResult, ScanContext, ScanReport } from '@bastion/shared';
+import type { CheckResult, ScanContext, ScanReport } from 'bastion-shared';
 
 // ---------------------------------------------------------------------------
 // Test helpers

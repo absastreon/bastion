@@ -5,7 +5,7 @@
  * tech stack, file locations, and actionable fix requests. Prompts are
  * designed to be pasted directly into Claude, ChatGPT, or any AI tool.
  */
-import type { CheckResult, ScanContext, DetectedStack } from '@bastion/shared';
+import type { CheckResult, ScanContext, DetectedStack } from 'bastion-shared';
 
 // ---------------------------------------------------------------------------
 // Stack description

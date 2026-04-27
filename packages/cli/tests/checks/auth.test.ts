@@ -6,7 +6,7 @@ import authCheck, {
   isLibraryOrCli,
   getRecommendedProvider,
 } from '../../src/checks/auth.js';
-import type { ScanContext, DetectedStack } from '@bastion/shared';
+import type { ScanContext, DetectedStack } from 'bastion-shared';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';

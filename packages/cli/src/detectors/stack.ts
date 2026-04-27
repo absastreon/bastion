@@ -2,7 +2,7 @@
  * F011: Stack detector — auto-detect framework, database, auth, hosting, language
  * from package.json dependencies and file patterns.
  */
-import type { DetectedStack } from '@bastion/shared';
+import type { DetectedStack } from 'bastion-shared';
 
 /** Matcher: first package found in deps → detected value */
 interface PackageMatcher {

@@ -7,7 +7,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction, CheckResult, DetectedStack } from '@bastion/shared';
+import type { CheckFunction, CheckResult, DetectedStack } from 'bastion-shared';
 
 const CHECK_ID = 'cors';
 const CHECK_NAME = 'CORS configuration';

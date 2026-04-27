@@ -4,7 +4,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction } from '@bastion/shared';
+import type { CheckFunction } from 'bastion-shared';
 
 const CHECK_ID = 'env-example';
 const CHECK_NAME = '.env.example exists';

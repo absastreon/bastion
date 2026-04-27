@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateScore, summarizeResults, runChecks, detectProjectType } from '../src/scanner.js';
-import type { CheckFunction, CheckResult, ScanContext } from '@bastion/shared';
+import type { CheckFunction, CheckResult, ScanContext } from 'bastion-shared';
 
 /** Minimal context for unit tests — no filesystem needed */
 const mockContext: ScanContext = {

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { ScanContext } from '@bastion/shared';
+import type { ScanContext } from 'bastion-shared';
 import envExampleCheck from '../../src/checks/env-example.js';
 
 let tempDir: string;

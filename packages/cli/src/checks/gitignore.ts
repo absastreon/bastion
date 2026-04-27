@@ -5,7 +5,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction, CheckResult, Severity } from '@bastion/shared';
+import type { CheckFunction, CheckResult, Severity } from 'bastion-shared';
 
 /** Entry that should be present in .gitignore */
 interface RequiredEntry {

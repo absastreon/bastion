@@ -3,7 +3,7 @@
  * Looks up _dmarc.{domain} TXT record to verify email authentication policy.
  */
 import { resolveTxt } from 'node:dns/promises';
-import type { CheckFunction } from '@bastion/shared';
+import type { CheckFunction } from 'bastion-shared';
 
 const CHECK_ID = 'dmarc';
 const CATEGORY = 'email';

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { isScannableFile, scanContent } from '../../src/checks/secrets.js';
 import secretsCheck from '../../src/checks/secrets.js';
-import type { ScanContext } from '@bastion/shared';
+import type { ScanContext } from 'bastion-shared';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';

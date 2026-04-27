@@ -4,7 +4,7 @@
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import type { CheckFunction, CheckResult, Severity } from '@bastion/shared';
+import type { CheckFunction, CheckResult, Severity } from 'bastion-shared';
 
 const CHECK_ID = 'dep-vuln';
 const CHECK_NAME = 'Dependency vulnerabilities';

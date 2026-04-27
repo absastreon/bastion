@@ -7,7 +7,7 @@
   <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/absastreon/bastion/ci.yml?branch=main&style=flat-square" />
   <img alt="Tests" src="https://img.shields.io/badge/tests-783%20passing-brightgreen?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
-  <img alt="npm" src="https://img.shields.io/npm/v/@bastion/cli?style=flat-square" />
+  <img alt="npm" src="https://img.shields.io/npm/v/bastion-scan?style=flat-square" />
 </p>
 
 ---

@@ -3,7 +3,7 @@
  * Fetches the provided URL and verifies critical security headers are present.
  * Skips gracefully when no URL is provided or the request fails.
  */
-import type { CheckFunction, CheckResult, ScanContext } from '@bastion/shared';
+import type { CheckFunction, CheckResult, ScanContext } from 'bastion-shared';
 import { fetchWithRetry } from '../utils/fetch-with-retry.js';
 
 const CHECK_ID = 'headers';

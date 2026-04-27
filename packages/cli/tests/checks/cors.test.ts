@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { isScannableFile, scanContent, buildAiPrompt } from '../../src/checks/cors.js';
 import corsCheck from '../../src/checks/cors.js';
-import type { ScanContext, DetectedStack } from '@bastion/shared';
+import type { ScanContext, DetectedStack } from 'bastion-shared';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';

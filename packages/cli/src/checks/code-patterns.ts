@@ -7,7 +7,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction, CheckResult, Severity } from '@bastion/shared';
+import type { CheckFunction, CheckResult, Severity } from 'bastion-shared';
 
 /** File extensions to scan for insecure code patterns */
 const CODE_EXTENSIONS = new Set(['.ts', '.js', '.tsx', '.jsx']);

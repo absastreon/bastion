@@ -2,7 +2,7 @@
  * Check: Server header information disclosure
  * Flags when the Server header reveals specific software and version info.
  */
-import type { CheckFunction } from '@bastion/shared';
+import type { CheckFunction } from 'bastion-shared';
 import { fetchWithRetry } from '../utils/fetch-with-retry.js';
 
 const CHECK_ID = 'server-disclosure';

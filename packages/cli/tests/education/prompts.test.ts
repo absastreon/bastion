@@ -5,7 +5,7 @@ import {
   enrichWithAiPrompts,
   findGenerator,
 } from '../../src/education/prompts.js';
-import type { CheckResult, ScanContext, DetectedStack } from '@bastion/shared';
+import type { CheckResult, ScanContext, DetectedStack } from 'bastion-shared';
 
 // ---------------------------------------------------------------------------
 // Test helpers

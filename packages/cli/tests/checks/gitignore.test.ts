@@ -6,7 +6,7 @@ import gitignoreCheck, {
   isEntryCovered,
   parseGitignore,
 } from '../../src/checks/gitignore.js';
-import type { ScanContext } from '@bastion/shared';
+import type { ScanContext } from 'bastion-shared';
 
 /** Build a minimal ScanContext pointing at a temp directory */
 function makeContext(projectPath: string): ScanContext {

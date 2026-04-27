@@ -6,7 +6,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join, basename } from 'node:path';
-import type { CheckFunction, CheckResult } from '@bastion/shared';
+import type { CheckFunction, CheckResult } from 'bastion-shared';
 
 /** File extensions to scan for secrets */
 const SCANNABLE_EXTENSIONS = new Set([

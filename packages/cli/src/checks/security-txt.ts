@@ -5,7 +5,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction, CheckResult } from '@bastion/shared';
+import type { CheckFunction, CheckResult } from 'bastion-shared';
 
 /** Paths where security.txt can be located (preferred order) */
 const SECURITY_TXT_PATHS = ['.well-known/security.txt', 'security.txt'] as const;

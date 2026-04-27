@@ -2,7 +2,7 @@
  * Terminal reporter — formatted console output for scan results
  */
 import chalk from 'chalk';
-import type { CheckResult, ScanReport } from '@bastion/shared';
+import type { CheckResult, ScanReport } from 'bastion-shared';
 
 /** Icon for a check result based on status and severity */
 function resultIcon(result: CheckResult): string {

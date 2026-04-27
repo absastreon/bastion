@@ -6,7 +6,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction, DetectedStack } from '@bastion/shared';
+import type { CheckFunction, DetectedStack } from 'bastion-shared';
 
 /** Known rate limiting packages in npm */
 const RATE_LIMIT_PACKAGES: readonly string[] = [
