@@ -1,6 +1,6 @@
 /**
  * Bastion CLI entry point
- * Privacy-first security checker for AI-era builders
+ * Privacy-first security checker for web projects
  */
 import { createRequire } from 'node:module';
 import { createProgram } from './cli.js';

@@ -30,7 +30,7 @@ export function createProgram(version: string): Command {
 
   program
     .name('bastion')
-    .description('Privacy-first security checker for AI-era builders')
+    .description('Privacy-first security checker for web projects')
     .version(version);
 
   program

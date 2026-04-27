@@ -31,7 +31,7 @@ export interface SecurityTool {
 export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   {
     name: 'Bastion',
-    description: 'Privacy-first security checker and educator for AI-era builders. Scans locally, never uploads code. Includes fix explanations and AI prompts.',
+    description: 'Security scanner for Cursor-generated code. Scans locally, never uploads code. 15 checks, fix explanations, and AI prompts.',
     category: 'static-analysis',
     url: 'https://github.com/ABS-Projects-2026/Bastion',
     pricing: 'free',

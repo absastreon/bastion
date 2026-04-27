@@ -1,6 +1,6 @@
 <p align="center">
   <strong>BASTION</strong><br/>
-  <em>Security scanner for web projects. Runs locally. Explains what it finds.</em>
+  <em>Security scanner for Cursor-generated code. Runs locally. Explains what it finds.</em>
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 
 Bastion scans your code for security issues and tells you how to fix them. It runs on your machine, never uploads your code, and works with any Node.js project.
 
-AI tools help you build fast, but they regularly ship hardcoded secrets, missing headers, and injection vectors. Enterprise scanners cost £300+/mo and drown you in jargon. Bastion is the middle ground: it catches the stuff that actually matters and explains it in plain English.
+Cursor (and other AI coding tools) help you build fast, but they regularly ship hardcoded secrets, missing headers, and injection vectors. Enterprise scanners cost £300+/mo and drown you in jargon. Bastion is the middle ground: it catches the stuff that actually matters and explains it in plain English.
 
 Every finding comes with a prompt you can paste into Claude, ChatGPT, or Copilot to get a fix tailored to your stack.
 
@@ -44,6 +44,14 @@ If you run scans frequently, install globally:
 npm install -g bastion-scan
 bastion scan
 ```
+
+---
+
+## Tuned for Cursor users
+
+Bastion includes detection rules tuned for patterns that Cursor's AI tends to produce: env vars exposed in client components, missing helmet middleware, Supabase service role keys leaked client-side, placeholder auth that looks real but verifies nothing. Other scanners use generic OWASP rules. Bastion knows what Cursor writes.
+
+Works with Lovable, Replit, Bolt, v0, and any other AI coding tool too — the checks are universal.
 
 ---
 
