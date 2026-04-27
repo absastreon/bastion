@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ScanContext } from '@bastion/shared';
+import type { ScanContext } from 'bastion-shared';
 
 /** Create a minimal ScanContext with overrides */
 function makeContext(overrides: Partial<ScanContext> = {}): ScanContext {

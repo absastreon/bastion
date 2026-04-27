@@ -7,7 +7,7 @@
  */
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { ConfigSnippet, DetectedStack } from '@bastion/shared';
+import type { ConfigSnippet, DetectedStack } from 'bastion-shared';
 
 // ---------------------------------------------------------------------------
 // Express configs

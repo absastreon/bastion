@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { ConfigSnippet, DetectedStack } from '@bastion/shared';
+import type { ConfigSnippet, DetectedStack } from 'bastion-shared';
 import {
   generateConfigs,
   formatConfigSnippet,

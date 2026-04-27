@@ -2,7 +2,7 @@
  * Check: Cookie security flags
  * Inspects Set-Cookie headers for HttpOnly, Secure, and SameSite attributes.
  */
-import type { CheckFunction, CheckResult } from '@bastion/shared';
+import type { CheckFunction, CheckResult } from 'bastion-shared';
 import { fetchWithRetry } from '../utils/fetch-with-retry.js';
 
 const CHECK_ID = 'cookies';

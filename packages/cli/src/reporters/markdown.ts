@@ -3,7 +3,7 @@
  */
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckResult, ScanContext, ScanReport, Severity } from '@bastion/shared';
+import type { CheckResult, ScanContext, ScanReport, Severity } from 'bastion-shared';
 
 /** Severity display order: most critical first */
 const SEVERITY_ORDER: readonly Severity[] = ['critical', 'high', 'medium', 'low', 'info'];

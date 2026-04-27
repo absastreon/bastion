@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { formatJsonReport } from '../../src/reporters/json.js';
 import type { JsonReportMetadata } from '../../src/reporters/json.js';
-import type { CheckResult, ScanReport } from '@bastion/shared';
+import type { CheckResult, ScanReport } from 'bastion-shared';
 
 /** Build a CheckResult with sensible defaults */
 function makeResult(overrides: Partial<CheckResult> = {}): CheckResult {

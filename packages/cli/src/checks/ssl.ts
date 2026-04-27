@@ -3,7 +3,7 @@
  */
 import { connect as tlsConnect } from 'node:tls';
 import { request as httpRequest } from 'node:http';
-import type { CheckFunction, CheckResult } from '@bastion/shared';
+import type { CheckFunction, CheckResult } from 'bastion-shared';
 
 const CHECK_ID = 'ssl';
 const CATEGORY = 'transport';

@@ -10,7 +10,7 @@ import type {
   ScanContext,
   ScanReport,
   ScanSummary,
-} from '@bastion/shared';
+} from 'bastion-shared';
 import { getAllChecks, getUrlOnlyChecks, getStaticSiteSkippableChecks } from './checks/index.js';
 import { detectStack } from './detectors/stack.js';
 import { enrichWithAiPrompts } from './education/prompts.js';

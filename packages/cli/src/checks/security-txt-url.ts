@@ -4,7 +4,7 @@
  * validates required fields (Contact, Expires) per RFC 9116.
  * URL-based counterpart to F009's file-based check.
  */
-import type { CheckFunction, CheckResult } from '@bastion/shared';
+import type { CheckFunction, CheckResult } from 'bastion-shared';
 import { fetchWithRetry } from '../utils/fetch-with-retry.js';
 
 const CHECK_ID = 'security-txt-url';

@@ -2,7 +2,7 @@
  * Check registry — all check modules are imported and listed here.
  * When adding a new check, import it and append to the array.
  */
-import type { CheckFunction } from '@bastion/shared';
+import type { CheckFunction } from 'bastion-shared';
 import gitignoreCheck from './gitignore.js';
 import secretsCheck from './secrets.js';
 import dependencyCheck from './dependencies.js';

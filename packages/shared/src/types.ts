@@ -1,5 +1,5 @@
 /**
- * Core types shared across @bastion/cli and @bastion/web
+ * Core types shared across bastion-scan and the web dashboard
  */
 
 /** Severity levels for security findings */

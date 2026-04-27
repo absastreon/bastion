@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import chalk from 'chalk';
 import { formatTerminalReport, formatScore } from '../src/reporters/terminal.js';
-import type { CheckResult, ScanReport } from '@bastion/shared';
+import type { CheckResult, ScanReport } from 'bastion-shared';
 
 // Force ANSI output for consistent assertions
 beforeAll(() => {

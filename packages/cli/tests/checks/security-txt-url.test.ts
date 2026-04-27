@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ScanContext } from '@bastion/shared';
+import type { ScanContext } from 'bastion-shared';
 import securityTxtUrlCheck from '../../src/checks/security-txt-url.js';
 
 const fetchMock = vi.fn();

@@ -7,7 +7,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CheckFunction, DetectedStack, ScanContext } from '@bastion/shared';
+import type { CheckFunction, DetectedStack, ScanContext } from 'bastion-shared';
 
 // ---------------------------------------------------------------------------
 // Constants

@@ -5,8 +5,8 @@
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import { OUTPUT_FORMATS } from '@bastion/shared';
-import type { OutputFormat } from '@bastion/shared';
+import { OUTPUT_FORMATS } from 'bastion-shared';
+import type { OutputFormat } from 'bastion-shared';
 import { buildContext, scan } from './scanner.js';
 import { formatTerminalReport } from './reporters/terminal.js';
 import { formatJsonReport } from './reporters/json.js';
