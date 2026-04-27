@@ -25,10 +25,7 @@ Every finding comes with a prompt you can paste into Claude, ChatGPT, or Copilot
 ## Quick Start
 
 ```bash
-# Install globally
-npm install -g bastion-scan
-
-# Scan your project
+# Scan your project (no install required)
 npx bastion-scan scan
 
 # Scan a live URL (headers, SSL, security.txt)
@@ -39,6 +36,13 @@ npx bastion-scan scan --format json
 
 # Generate security configs for your stack
 npx bastion-scan scan --generate-configs
+```
+
+If you run scans frequently, install globally:
+
+```bash
+npm install -g bastion-scan
+bastion scan
 ```
 
 ---
