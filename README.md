@@ -59,6 +59,9 @@ npx bastion-scan scan --generate-configs
 | Rate limiting | Looks for `express-rate-limit`, `@upstash/ratelimit`, etc. |
 | Auth method | Flags hand-rolled auth, suggests Clerk/Supabase/NextAuth |
 | `security.txt` URL | Fetches and validates the remote file |
+| Cookie security | Checks `Set-Cookie` flags: `HttpOnly`, `Secure`, `SameSite` |
+| Server disclosure | Flags `Server` headers that leak software versions |
+| DMARC record | Verifies email authentication policy via DNS |
 
 ### Stack detection
 
@@ -193,7 +196,7 @@ Floor is 0. Only `fail` results deduct. `warn`, `skip`, and `pass` don't affect 
 ```
 bastion/
 ├── packages/
-│   ├── cli/          # npx bastion-scan scan, 12 checks, 3 reporters
+│   ├── cli/          # npx bastion-scan scan, 15 checks, 3 reporters
 │   ├── shared/       # Types, checklist data, OWASP data, tools
 │   └── web/          # Next.js 14 dashboard
 └── docs/playbooks/   # Stack-specific security guides

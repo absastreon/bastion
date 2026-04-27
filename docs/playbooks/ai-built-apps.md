@@ -197,7 +197,7 @@ Follow this 5-step process:
 4. **Verify dependencies are real.** Check `package.json` — are the security packages actually installed and imported?
 
 5. **Run automated tools.** Use tools built to catch what humans miss:
-   - **[Bastion](https://github.com/ABS-Projects-2026/Bastion)** — security checker for AI-built apps (12 checks, AI-generated fix prompts)
+   - **[Bastion](https://github.com/ABS-Projects-2026/Bastion)** — security checker for AI-built apps (15 checks, AI-generated fix prompts)
    - **[Skylos](https://github.com/ABS-Projects-2026/Skylos)** — dead code detection (finds unused security functions)
    - **Dependabot** — alerts for vulnerable dependencies (built into GitHub)
    - **`npm audit`** — checks for known vulnerabilities in dependencies
