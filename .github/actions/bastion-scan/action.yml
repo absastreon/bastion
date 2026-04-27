@@ -54,7 +54,7 @@ runs:
 
     - name: Install Bastion CLI
       shell: bash
-      run: npm install -g @bastion/cli@latest
+      run: npm install -g bastion-scan@latest
 
     - name: Run Bastion Scan
       id: scan
