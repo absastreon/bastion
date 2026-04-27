@@ -1,7 +1,7 @@
 /**
  * bastion-shared — Types, constants, and data shared across packages
  */
-export const VERSION = '0.1.1';
+export const VERSION = '0.1.2';
 
 export { OUTPUT_FORMATS } from './types.js';
 
