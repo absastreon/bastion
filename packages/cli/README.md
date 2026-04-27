@@ -53,6 +53,20 @@ Bastion includes detection rules tuned for patterns that Cursor's AI tends to pr
 
 Works with Lovable, Replit, Bolt, v0, and any other AI coding tool too — the checks are universal.
 
+### Cursor users: add this to `.cursorignore` first
+
+`.gitignore` stops secrets from being committed, but Cursor's codebase indexer still reads `.gitignore`d files by default. Add a `.cursorignore` file to prevent Cursor from ever seeing your secrets:
+
+```
+.env
+.env.*
+*.pem
+*.key
+secrets/
+```
+
+This single step prevents your keys from leaking into Cursor's context window — and into any AI-generated code that references them.
+
 ---
 
 ## What it checks
