@@ -1,6 +1,6 @@
 <p align="center">
   <strong>BASTION</strong><br/>
-  <em>Security scanner for web projects. Runs locally. Explains what it finds.</em>
+  <em>Security scanner for Cursor-generated code. Runs locally. Explains what it finds.</em>
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 
 Bastion scans your code for security issues and tells you how to fix them. It runs on your machine, never uploads your code, and works with any Node.js project.
 
-AI tools help you build fast, but they regularly ship hardcoded secrets, missing headers, and injection vectors. Enterprise scanners cost £300+/mo and drown you in jargon. Bastion is the middle ground: it catches the stuff that actually matters and explains it in plain English.
+Cursor (and other AI coding tools) help you build fast, but they regularly ship hardcoded secrets, missing headers, and injection vectors. Enterprise scanners cost £300+/mo and drown you in jargon. Bastion is the middle ground: it catches the stuff that actually matters and explains it in plain English.
 
 Every finding comes with a prompt you can paste into Claude, ChatGPT, or Copilot to get a fix tailored to your stack.
 
@@ -25,10 +25,7 @@ Every finding comes with a prompt you can paste into Claude, ChatGPT, or Copilot
 ## Quick Start
 
 ```bash
-# Install globally
-npm install -g bastion-scan
-
-# Scan your project
+# Scan your project (no install required)
 npx bastion-scan scan
 
 # Scan a live URL (headers, SSL, security.txt)
@@ -40,6 +37,35 @@ npx bastion-scan scan --format json
 # Generate security configs for your stack
 npx bastion-scan scan --generate-configs
 ```
+
+If you run scans frequently, install globally:
+
+```bash
+npm install -g bastion-scan
+bastion scan
+```
+
+---
+
+## Tuned for Cursor users
+
+Bastion includes detection rules tuned for patterns that Cursor's AI tends to produce: env vars exposed in client components, missing helmet middleware, Supabase service role keys leaked client-side, placeholder auth that looks real but verifies nothing. Other scanners use generic OWASP rules. Bastion knows what Cursor writes.
+
+Works with Lovable, Replit, Bolt, v0, and any other AI coding tool too — the checks are universal.
+
+### Cursor users: add this to `.cursorignore` first
+
+`.gitignore` stops secrets from being committed, but Cursor's codebase indexer still reads `.gitignore`d files by default. Add a `.cursorignore` file to prevent Cursor from ever seeing your secrets:
+
+```
+.env
+.env.*
+*.pem
+*.key
+secrets/
+```
+
+This single step prevents your keys from leaking into Cursor's context window — and into any AI-generated code that references them.
 
 ---
 
@@ -59,6 +85,9 @@ npx bastion-scan scan --generate-configs
 | Rate limiting | Looks for `express-rate-limit`, `@upstash/ratelimit`, etc. |
 | Auth method | Flags hand-rolled auth, suggests Clerk/Supabase/NextAuth |
 | `security.txt` URL | Fetches and validates the remote file |
+| Cookie security | Checks `Set-Cookie` flags: `HttpOnly`, `Secure`, `SameSite` |
+| Server disclosure | Flags `Server` headers that leak software versions |
+| DMARC record | Verifies email authentication policy via DNS |
 
 ### Stack detection
 
@@ -124,16 +153,16 @@ The web dashboard lives at [bastion.wiki](https://bastion.wiki).
 | | Free | Pro | Team |
 |---|---|---|---|
 | **Price** | £0 | £4/mo or £39/yr | £15/mo or £119/yr |
-| CLI checks | 5 | All 12 | All 12 |
-| URL scans | 1/day | Unlimited | Unlimited |
-| AI prompts | 3/scan | Unlimited | Unlimited |
-| Config generators | | Yes | Yes |
-| Security badge | | Yes | Yes |
-| GitHub Action | | Public repos | All repos |
+| URL scans | Unlimited | Unlimited | Unlimited |
+| CLI scans | 10/month | Unlimited | Unlimited |
+| AI fix prompts | — | Unlimited | Unlimited |
+| Config generators | — | Yes | Yes |
+| Security badge | — | Yes | Yes |
+| GitHub Action | — | Public repos | All repos |
 | Projects | 1 | 3 | Unlimited |
-| Compliance reports | | | Yes |
-| CVE alerts | | | Yes |
-| Score history | | | Yes |
+| Compliance reports | — | — | Yes |
+| CVE alerts | — | — | Yes |
+| Score history | — | — | Yes |
 
 Annual plans save 2 months. All plans come with a 14-day free trial.
 
@@ -193,7 +222,7 @@ Floor is 0. Only `fail` results deduct. `warn`, `skip`, and `pass` don't affect 
 ```
 bastion/
 ├── packages/
-│   ├── cli/          # npx bastion-scan scan, 12 checks, 3 reporters
+│   ├── cli/          # npx bastion-scan scan, 15 checks, 3 reporters
 │   ├── shared/       # Types, checklist data, OWASP data, tools
 │   └── web/          # Next.js 14 dashboard
 └── docs/playbooks/   # Stack-specific security guides

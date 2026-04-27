@@ -31,9 +31,9 @@ export interface SecurityTool {
 export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   {
     name: 'Bastion',
-    description: 'Privacy-first security checker and educator for AI-era builders. Scans locally, never uploads code. Includes fix explanations and AI prompts.',
+    description: 'Security scanner for Cursor-generated code. Scans locally, never uploads code. 15 checks, fix explanations, and AI prompts.',
     category: 'static-analysis',
-    url: 'https://github.com/ABS-Projects-2026/Bastion',
+    url: 'https://github.com/absastreon/bastion',
     pricing: 'free',
     tags: ['cli', 'education', 'privacy-first', 'ai-prompts'],
   },
@@ -41,7 +41,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
     name: 'Skylos',
     description: 'Dead code detection for TypeScript and JavaScript projects. Finds unused exports, functions, types, and modules to reduce attack surface.',
     category: 'code-quality',
-    url: 'https://github.com/ABS-Projects-2026/Skylos',
+    url: 'https://github.com/duriantaco/skylos',
     pricing: 'free',
     tags: ['dead-code', 'typescript', 'cli', 'treeshaking'],
   },

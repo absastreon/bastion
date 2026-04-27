@@ -1,5 +1,5 @@
 name: 'Bastion Security Scan'
-description: 'Privacy-first security checker for AI-era builders. Scans your project and reports findings on PRs.'
+description: 'Security scanner for Cursor-generated code. Scans your project and reports findings on PRs.'
 author: 'Bastion'
 
 branding:
@@ -174,7 +174,7 @@ runs:
             body += `\n`;
           }
 
-          body += `---\n*🛡️ [Bastion](https://github.com/ABS-Projects-2026/Bastion) — Privacy-first security for AI-era builders*`;
+          body += `---\n*🛡️ [Bastion](https://github.com/absastreon/bastion) — Privacy-first security for Cursor users*`;
 
           // Find and update existing comment, or create new one
           const { data: comments } = await github.rest.issues.listComments({

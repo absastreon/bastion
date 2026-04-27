@@ -1,5 +1,5 @@
 /**
- * Security checklist items — the core Bastion checklist for AI-era builders.
+ * Security checklist items — the core Bastion checklist for web projects.
  * Used by the web dashboard's interactive checklist page.
  */
 
