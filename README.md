@@ -48,7 +48,7 @@ npx bastion-scan scan --generate-configs
 | Check | What it does |
 |-------|-------------|
 | `.gitignore` coverage | Makes sure `.env`, `node_modules`, and keys are excluded |
-| Hardcoded secrets | Looks for API keys from OpenAI, Stripe, AWS, and others |
+| Hardcoded secrets | API keys from OpenAI, Anthropic, GitHub, Stripe, AWS, Google, Slack, and more |
 | Dependency audit | Wraps `npm audit` and maps findings to severity levels |
 | `.env.example` | Checks that a template exists with safe placeholder values |
 | `security.txt` | Validates RFC 9116 Contact + Expires fields |

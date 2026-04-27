@@ -6,7 +6,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join, basename } from 'node:path';
-import type { CheckFunction, CheckResult } from 'bastion-shared';
+import type { CheckFunction, CheckResult, Severity } from 'bastion-shared';
 
 /** File extensions to scan for secrets */
 const SCANNABLE_EXTENSIONS = new Set([
@@ -28,44 +28,157 @@ interface SecretPattern {
   readonly name: string;
   readonly regex: RegExp;
   readonly description: string;
+  readonly severity: Severity;
 }
 
 /** Patterns that indicate hardcoded secrets */
 const SECRET_PATTERNS: readonly SecretPattern[] = [
+  // ── OpenAI ──────────────────────────────────────────────────────────────
   {
-    name: 'OpenAI API key',
-    regex: /sk-[A-Za-z0-9]{20,}/,
-    description: 'OpenAI API key detected',
+    name: 'OpenAI API key (project)',
+    regex: /sk-proj-[a-zA-Z0-9_-]{20,}/,
+    description: 'OpenAI project API key detected',
+    severity: 'critical',
   },
   {
+    name: 'OpenAI API key (service account)',
+    regex: /sk-svcacct-[a-zA-Z0-9_-]{20,}/,
+    description: 'OpenAI service account key detected',
+    severity: 'critical',
+  },
+  {
+    name: 'OpenAI API key (legacy)',
+    regex: /sk-[a-zA-Z0-9]{20,}/,
+    description: 'OpenAI API key detected',
+    severity: 'critical',
+  },
+
+  // ── Anthropic ───────────────────────────────────────────────────────────
+  {
+    name: 'Anthropic API key',
+    regex: /sk-ant-api[0-9]{2}-[a-zA-Z0-9_-]{40,}/,
+    description: 'Anthropic API key detected',
+    severity: 'critical',
+  },
+  {
+    name: 'Anthropic admin key',
+    regex: /sk-ant-admin[0-9]{2}-[a-zA-Z0-9_-]{40,}/,
+    description: 'Anthropic admin API key detected',
+    severity: 'critical',
+  },
+
+  // ── GitHub ──────────────────────────────────────────────────────────────
+  {
+    name: 'GitHub PAT (classic)',
+    regex: /ghp_[a-zA-Z0-9]{36}/,
+    description: 'GitHub personal access token (classic) detected',
+    severity: 'critical',
+  },
+  {
+    name: 'GitHub OAuth token',
+    regex: /gho_[a-zA-Z0-9]{36}/,
+    description: 'GitHub OAuth access token detected',
+    severity: 'critical',
+  },
+  {
+    name: 'GitHub PAT (fine-grained)',
+    regex: /github_pat_[a-zA-Z0-9_]{82}/,
+    description: 'GitHub fine-grained personal access token detected',
+    severity: 'critical',
+  },
+  {
+    name: 'GitHub app token',
+    regex: /ghs_[a-zA-Z0-9]{36}/,
+    description: 'GitHub app installation token detected',
+    severity: 'critical',
+  },
+  {
+    name: 'GitHub refresh token',
+    regex: /ghr_[a-zA-Z0-9]{36}/,
+    description: 'GitHub refresh token detected',
+    severity: 'critical',
+  },
+
+  // ── Stripe ──────────────────────────────────────────────────────────────
+  {
     name: 'Stripe secret key',
-    regex: /sk_live_[A-Za-z0-9]{20,}/,
+    regex: /sk_live_[a-zA-Z0-9]{24,}/,
     description: 'Stripe secret key detected',
+    severity: 'critical',
   },
   {
     name: 'Stripe publishable key',
-    regex: /pk_live_[A-Za-z0-9]{20,}/,
+    regex: /pk_live_[a-zA-Z0-9]{20,}/,
     description: 'Stripe publishable live key detected',
+    severity: 'critical',
   },
+  {
+    name: 'Stripe restricted key',
+    regex: /rk_live_[a-zA-Z0-9]{24,}/,
+    description: 'Stripe restricted API key detected',
+    severity: 'critical',
+  },
+  {
+    name: 'Stripe test key',
+    regex: /sk_test_[a-zA-Z0-9]{24,}/,
+    description: 'Stripe test secret key detected',
+    severity: 'high',
+  },
+
+  // ── AWS ─────────────────────────────────────────────────────────────────
   {
     name: 'AWS access key',
     regex: /AKIA[0-9A-Z]{16}/,
     description: 'AWS access key ID detected',
+    severity: 'critical',
   },
+
+  // ── Google ──────────────────────────────────────────────────────────────
+  {
+    name: 'Google API key',
+    regex: /AIza[a-zA-Z0-9_-]{35}/,
+    description: 'Google API key detected',
+    severity: 'critical',
+  },
+
+  // ── Slack ───────────────────────────────────────────────────────────────
+  {
+    name: 'Slack bot token',
+    regex: /xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,}/,
+    description: 'Slack bot token detected',
+    severity: 'critical',
+  },
+  {
+    name: 'Slack user token',
+    regex: /xoxp-[0-9]{10,13}-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{32}/,
+    description: 'Slack user token detected',
+    severity: 'critical',
+  },
+  {
+    name: 'Slack webhook URL',
+    regex: /https:\/\/hooks\.slack\.com\/services\/T[a-zA-Z0-9]{8,12}\/B[a-zA-Z0-9]{8,12}\/[a-zA-Z0-9]{24}/,
+    description: 'Slack incoming webhook URL detected',
+    severity: 'high',
+  },
+
+  // ── Generic ─────────────────────────────────────────────────────────────
   {
     name: 'Generic API key assignment',
     regex: /(?:api[_-]?key|apikey|api[_-]?secret)\s*[:=]\s*['"][A-Za-z0-9_\-/.]{8,}['"]/i,
     description: 'Hardcoded API key assignment detected',
+    severity: 'critical',
   },
   {
     name: 'Bearer token',
     regex: /['"]Bearer\s+[A-Za-z0-9_\-/.+]{20,}['"]/,
     description: 'Hardcoded Bearer token detected',
+    severity: 'critical',
   },
   {
     name: 'Database connection string',
     regex: /(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis):\/\/[^:]+:[^@\s]+@/i,
     description: 'Database connection string with embedded password detected',
+    severity: 'critical',
   },
 ];
 
@@ -123,7 +236,7 @@ function scanContent(
           id: 'secrets',
           name: `Hardcoded secret: ${pattern.name}`,
           status: 'fail',
-          severity: 'critical',
+          severity: pattern.severity,
           category: 'Secrets',
           location: `${relativePath}:${i + 1}`,
           description: pattern.description,

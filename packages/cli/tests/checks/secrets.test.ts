@@ -6,6 +6,14 @@ import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
+/**
+ * Build a test key from prefix + body.
+ * Splitting prevents GitHub push protection from flagging test fixtures.
+ */
+function fakeKey(prefix: string, body: string): string {
+  return prefix + body;
+}
+
 // ---------------------------------------------------------------------------
 // isScannableFile
 // ---------------------------------------------------------------------------
@@ -87,7 +95,7 @@ describe('isScannableFile', () => {
 // ---------------------------------------------------------------------------
 
 describe('scanContent — OpenAI keys', () => {
-  it('detects sk- prefixed keys', () => {
+  it('detects legacy sk- prefixed keys', () => {
     const content = 'const key = "sk-abc123def456ghi789jkl012mno345";';
     const results = scanContent(content, 'config.ts');
     expect(results).toHaveLength(1);
@@ -99,10 +107,95 @@ describe('scanContent — OpenAI keys', () => {
     expect(r?.name).toContain('OpenAI');
   });
 
+  it('detects sk-proj- project keys', () => {
+    const content = 'const key = "sk-proj-abc123def456ghi789jkl012mno345pqr678stu901vwx234yz";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('OpenAI') && r.name.includes('project'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('detects sk-svcacct- service account keys', () => {
+    const content = 'const key = "sk-svcacct-abc123def456ghi789jkl012mno345";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('OpenAI') && r.name.includes('service account'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
   it('ignores short sk- strings (not real keys)', () => {
     const content = 'const x = "sk-short";';
     const results = scanContent(content, 'test.ts');
     expect(results).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scanContent — Anthropic keys
+// ---------------------------------------------------------------------------
+
+describe('scanContent — Anthropic keys', () => {
+  it('detects sk-ant-api03- API keys', () => {
+    const content = 'const key = "sk-ant-api03-abcdefghijklmnopqrstuvwxyz1234567890abcdef1234";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('Anthropic API'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('detects sk-ant-admin01- admin keys', () => {
+    const content = 'const key = "sk-ant-admin01-abcdefghijklmnopqrstuvwxyz1234567890abcdef1234";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('Anthropic admin'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('ignores sk-ant- without enough trailing chars', () => {
+    const content = 'const x = "sk-ant-api03-short";';
+    const results = scanContent(content, 'test.ts');
+    expect(results.filter((r) => r.name.includes('Anthropic'))).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scanContent — GitHub tokens
+// ---------------------------------------------------------------------------
+
+describe('scanContent — GitHub tokens', () => {
+  it('detects ghp_ classic PATs', () => {
+    const content = 'const token = "ghp_ABCDEFghijklmnopqrstuvwxyz1234567890";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('GitHub PAT (classic)'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('detects gho_ OAuth tokens', () => {
+    const content = 'const token = "gho_ABCDEFghijklmnopqrstuvwxyz1234567890";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('GitHub OAuth'))).toBe(true);
+  });
+
+  it('detects github_pat_ fine-grained PATs', () => {
+    // 82 chars after github_pat_
+    const pat = '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';
+    const content = `const token = "${pat}";`;
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('GitHub PAT (fine-grained)'))).toBe(true);
+  });
+
+  it('detects ghs_ app tokens', () => {
+    const content = 'const token = "ghs_ABCDEFghijklmnopqrstuvwxyz1234567890";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('GitHub app'))).toBe(true);
+  });
+
+  it('detects ghr_ refresh tokens', () => {
+    const content = 'const token = "ghr_ABCDEFghijklmnopqrstuvwxyz1234567890";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('GitHub refresh'))).toBe(true);
+  });
+
+  it('ignores ghp_ with too few chars', () => {
+    const content = 'const x = "ghp_short";';
+    const results = scanContent(content, 'test.ts');
+    expect(results.filter((r) => r.name.includes('GitHub'))).toHaveLength(0);
   });
 });
 
@@ -112,7 +205,8 @@ describe('scanContent — OpenAI keys', () => {
 
 describe('scanContent — Stripe keys', () => {
   it('detects sk_live_ keys', () => {
-    const content = 'const stripe = "sk_live_ABCDEFghijklmnopqrstuv";';
+    const key = fakeKey('sk_live', '_FAKETESTKEYDONOTUSE0000000000');
+    const content = `const stripe = "${key}";`;
     const results = scanContent(content, 'payment.ts');
     expect(results).toHaveLength(1);
     expect(results[0]?.name).toContain('Stripe secret');
@@ -123,6 +217,22 @@ describe('scanContent — Stripe keys', () => {
     const results = scanContent(content, 'payment.ts');
     expect(results).toHaveLength(1);
     expect(results[0]?.name).toContain('Stripe publishable');
+  });
+
+  it('detects rk_live_ restricted keys', () => {
+    const key = fakeKey('rk_live', '_FAKETESTKEYDONOTUSE0000000000');
+    const content = `const rk = "${key}";`;
+    const results = scanContent(content, 'payment.ts');
+    expect(results.some((r) => r.name.includes('Stripe restricted'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('detects sk_test_ test keys as high severity', () => {
+    const key = fakeKey('sk_test', '_FAKETESTKEYDONOTUSE0000000000');
+    const content = `const test = "${key}";`;
+    const results = scanContent(content, 'payment.ts');
+    expect(results.some((r) => r.name.includes('Stripe test'))).toBe(true);
+    expect(results[0]?.severity).toBe('high');
   });
 });
 
@@ -142,6 +252,60 @@ describe('scanContent — AWS keys', () => {
     const content = 'const x = "AKIA_short";';
     const results = scanContent(content, 'test.ts');
     expect(results).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scanContent — Google API keys
+// ---------------------------------------------------------------------------
+
+describe('scanContent — Google API keys', () => {
+  it('detects AIza prefixed keys', () => {
+    const content = 'const key = "AIzaSyA1234567890abcdefghijklmnopqrstuvw";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('Google API'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('ignores AIza with too few chars', () => {
+    const content = 'const x = "AIzaShort";';
+    const results = scanContent(content, 'test.ts');
+    expect(results.filter((r) => r.name.includes('Google'))).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scanContent — Slack tokens
+// ---------------------------------------------------------------------------
+
+describe('scanContent — Slack tokens', () => {
+  it('detects xoxb- bot tokens', () => {
+    const key = fakeKey('xoxb-1111111111-1111111111111', '-FAKETESTTOKENDONOTUSE0000');
+    const content = `const token = "${key}";`;
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('Slack bot'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('detects xoxp- user tokens', () => {
+    const content = 'const token = "xoxp-1234567890-1234567890-1234567890-abcdefghijklmnopqrstuvwxyz123456";';
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('Slack user'))).toBe(true);
+    expect(results[0]?.severity).toBe('critical');
+  });
+
+  it('detects Slack webhook URLs as high severity', () => {
+    const url = fakeKey('https://hooks.slack.com/services/T00000000/B00000000', '/FAKETESTWEBHOOK000000000');
+    const content = `const hook = "${url}";`;
+    const results = scanContent(content, 'config.ts');
+    expect(results.some((r) => r.name.includes('Slack webhook'))).toBe(true);
+    expect(results[0]?.severity).toBe('high');
+  });
+
+  it('ignores partial xoxb- without full structure', () => {
+    const content = 'const x = "xoxb-short";';
+    const results = scanContent(content, 'test.ts');
+    expect(results.filter((r) => r.name.includes('Slack'))).toHaveLength(0);
   });
 });
 
@@ -283,11 +447,30 @@ describe('scanContent — result shape', () => {
   it('detects multiple secrets in one file', () => {
     const content = [
       'const openai = "sk-abc123def456ghi789jkl012mno345";',
-      'const stripe = "sk_live_ABCDEFghijklmnopqrstuv";',
+      `const stripe = "${fakeKey('sk_live', '_FAKETESTKEYDONOTUSE0000000000')}";`,
       'const db = "postgres://user:pass@host/db";',
     ].join('\n');
     const results = scanContent(content, 'config.ts');
     expect(results.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('detects two keys of the same type on different lines', () => {
+    const content = [
+      'const key1 = "sk-proj-abc123def456ghi789jkl012mno345pqr678stu901vwx234yz";',
+      'const key2 = "sk-proj-zzz999abc123def456ghi789jkl012mno345pqr678stu901vw";',
+    ].join('\n');
+    const results = scanContent(content, 'config.ts');
+    expect(results).toHaveLength(2);
+    expect(results[0]?.location).toBe('config.ts:1');
+    expect(results[1]?.location).toBe('config.ts:2');
+  });
+
+  it('uses per-pattern severity (high for Stripe test keys)', () => {
+    const key = fakeKey('sk_test', '_FAKETESTKEYDONOTUSE0000000000');
+    const content = `const key = "${key}";`;
+    const results = scanContent(content, 'config.ts');
+    expect(results).toHaveLength(1);
+    expect(results[0]?.severity).toBe('high');
   });
 });
 
@@ -388,7 +571,7 @@ describe('secretsCheck — integration', () => {
   it('scans multiple files', async () => {
     const results = await runWith({
       'src/a.ts': 'const a = "sk-abc123def456ghi789jkl012mno345";',
-      'src/b.ts': 'const b = "sk_live_ABCDEFghijklmnopqrstuv";',
+      'src/b.ts': `const b = "${fakeKey('sk_live', '_FAKETESTKEYDONOTUSE0000000000')}";`,
       'src/clean.ts': 'const c = process.env.KEY;',
     });
     expect(results.filter((r) => r.status === 'fail')).toHaveLength(2);
