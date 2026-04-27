@@ -131,16 +131,16 @@ The web dashboard lives at [bastion.wiki](https://bastion.wiki).
 | | Free | Pro | Team |
 |---|---|---|---|
 | **Price** | £0 | £4/mo or £39/yr | £15/mo or £119/yr |
-| CLI checks | 5 | All 12 | All 12 |
-| URL scans | 1/day | Unlimited | Unlimited |
-| AI prompts | 3/scan | Unlimited | Unlimited |
-| Config generators | | Yes | Yes |
-| Security badge | | Yes | Yes |
-| GitHub Action | | Public repos | All repos |
+| URL scans | Unlimited | Unlimited | Unlimited |
+| CLI scans | 10/month | Unlimited | Unlimited |
+| AI fix prompts | — | Unlimited | Unlimited |
+| Config generators | — | Yes | Yes |
+| Security badge | — | Yes | Yes |
+| GitHub Action | — | Public repos | All repos |
 | Projects | 1 | 3 | Unlimited |
-| Compliance reports | | | Yes |
-| CVE alerts | | | Yes |
-| Score history | | | Yes |
+| Compliance reports | — | — | Yes |
+| CVE alerts | — | — | Yes |
+| Score history | — | — | Yes |
 
 Annual plans save 2 months. All plans come with a 14-day free trial.
 
