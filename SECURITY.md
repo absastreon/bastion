@@ -12,8 +12,8 @@ We will acknowledge your report within 48 hours and aim to release a fix within 
 ## Scope
 
 This policy covers:
-- The `@bastion/cli` npm package
-- The `@bastion/shared` npm package
+- The `bastion-scan` npm package
+- The `bastion-shared` npm package
 - The Bastion web application (bastion.wiki)
 - The Bastion GitHub Action
 
