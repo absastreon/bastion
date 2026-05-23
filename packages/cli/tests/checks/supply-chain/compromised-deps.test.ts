@@ -184,20 +184,35 @@ describe('compromisedDepsCheck', () => {
     expect(results[0].description).toContain('malformed JSON');
   });
 
-  it('returns pass when compromised list is empty (current default)', async () => {
-    const lockfile = makeLockfile({ foo: '1.0.0' });
-    await writeFile(join(testDir, 'package-lock.json'), JSON.stringify(lockfile));
-    const ctx = makeContext(testDir, { dependencies: { foo: '^1.0.0' } });
-    const results = await compromisedDepsCheck(ctx);
+  it('returns pass describing empty list when COMPROMISED_PACKAGES is empty', async () => {
+    // Directly test the empty-list early-return path (lines 123-134 of the check).
+    // This path is live code even though the list is currently populated --
+    // it guards against a future empty list or a misconfigured data file.
+    const { COMPROMISED_PACKAGES } = await import('../../../src/data/compromised-packages.js');
+    const originalLength = COMPROMISED_PACKAGES.length;
 
-    expect(results).toHaveLength(1);
-    expect(results[0].status).toBe('pass');
-    expect(results[0].description).toContain('empty');
+    // Temporarily splice the array to empty (readonly at type level, but
+    // mutable at runtime for testing). Restore after the assertion.
+    const backup = [...COMPROMISED_PACKAGES];
+    (COMPROMISED_PACKAGES as unknown as CompromisedPackage[]).splice(0, originalLength);
+
+    try {
+      const lockfile = makeLockfile({ foo: '1.0.0' });
+      await writeFile(join(testDir, 'package-lock.json'), JSON.stringify(lockfile));
+      const ctx = makeContext(testDir, { dependencies: { foo: '^1.0.0' } });
+      const results = await compromisedDepsCheck(ctx);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].status).toBe('pass');
+      expect(results[0].description).toContain('empty');
+    } finally {
+      (COMPROMISED_PACKAGES as unknown as CompromisedPackage[]).push(...backup);
+    }
   });
 
   it('returns pass when no direct deps match compromised list', async () => {
-    // This test uses the actual COMPROMISED_PACKAGES (currently empty),
-    // so it should pass regardless of lockfile content
+    // Uses the real COMPROMISED_PACKAGES (populated with historical entries);
+    // 'safe-pkg' does not appear in the list, so the check passes
     const lockfile = makeLockfile({ 'safe-pkg': '3.0.0' });
     await writeFile(join(testDir, 'package-lock.json'), JSON.stringify(lockfile));
     const ctx = makeContext(testDir, { dependencies: { 'safe-pkg': '^3.0.0' } });
