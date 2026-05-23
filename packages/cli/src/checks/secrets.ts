@@ -6,7 +6,7 @@
  */
 import { readFile } from 'node:fs/promises';
 import { join, basename } from 'node:path';
-import type { CheckFunction, CheckResult, Severity } from 'bastion-shared';
+import type { CheckFunction, CheckResult, Severity } from '@bastion/shared';
 
 /** File extensions to scan for secrets */
 const SCANNABLE_EXTENSIONS = new Set([
@@ -33,7 +33,7 @@ interface SecretPattern {
 
 /** Patterns that indicate hardcoded secrets */
 const SECRET_PATTERNS: readonly SecretPattern[] = [
-  // ── OpenAI ──────────────────────────────────────────────────────────────
+  // -- OpenAI ------------------------------------------------------------------
   {
     name: 'OpenAI API key (project)',
     regex: /sk-proj-[a-zA-Z0-9_-]{20,}/,
@@ -53,7 +53,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'critical',
   },
 
-  // ── Anthropic ───────────────────────────────────────────────────────────
+  // -- Anthropic ---------------------------------------------------------------
   {
     name: 'Anthropic API key',
     regex: /sk-ant-api[0-9]{2}-[a-zA-Z0-9_-]{40,}/,
@@ -67,7 +67,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'critical',
   },
 
-  // ── GitHub ──────────────────────────────────────────────────────────────
+  // -- GitHub ------------------------------------------------------------------
   {
     name: 'GitHub PAT (classic)',
     regex: /ghp_[a-zA-Z0-9]{36}/,
@@ -99,7 +99,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'critical',
   },
 
-  // ── Stripe ──────────────────────────────────────────────────────────────
+  // -- Stripe ------------------------------------------------------------------
   {
     name: 'Stripe secret key',
     regex: /sk_live_[a-zA-Z0-9]{24,}/,
@@ -125,7 +125,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'high',
   },
 
-  // ── AWS ─────────────────────────────────────────────────────────────────
+  // -- AWS ---------------------------------------------------------------------
   {
     name: 'AWS access key',
     regex: /AKIA[0-9A-Z]{16}/,
@@ -133,7 +133,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'critical',
   },
 
-  // ── Google ──────────────────────────────────────────────────────────────
+  // -- Google ------------------------------------------------------------------
   {
     name: 'Google API key',
     regex: /AIza[a-zA-Z0-9_-]{35}/,
@@ -141,7 +141,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'critical',
   },
 
-  // ── Slack ───────────────────────────────────────────────────────────────
+  // -- Slack -------------------------------------------------------------------
   {
     name: 'Slack bot token',
     regex: /xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,}/,
@@ -161,7 +161,7 @@ const SECRET_PATTERNS: readonly SecretPattern[] = [
     severity: 'high',
   },
 
-  // ── Generic ─────────────────────────────────────────────────────────────
+  // -- Generic -----------------------------------------------------------------
   {
     name: 'Generic API key assignment',
     regex: /(?:api[_-]?key|apikey|api[_-]?secret)\s*[:=]\s*['"][A-Za-z0-9_\-/.]{8,}['"]/i,

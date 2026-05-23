@@ -2,7 +2,7 @@
  * Check registry — all check modules are imported and listed here.
  * When adding a new check, import it and append to the array.
  */
-import type { CheckFunction } from 'bastion-shared';
+import type { CheckFunction } from '@bastion/shared';
 import gitignoreCheck from './gitignore.js';
 import secretsCheck from './secrets.js';
 import dependencyCheck from './dependencies.js';
@@ -18,6 +18,7 @@ import authCheck from './auth.js';
 import cookieCheck from './cookies.js';
 import serverDisclosureCheck from './server-disclosure.js';
 import dmarcCheck from './dmarc.js';
+import { ignoreScriptsCheck, compromisedDepsCheck, npmCiCheck, selfHostedRunnerCheck } from './supply-chain/index.js';
 
 /** Return all registered check functions */
 export function getAllChecks(): readonly CheckFunction[] {
@@ -37,6 +38,10 @@ export function getAllChecks(): readonly CheckFunction[] {
     cookieCheck,
     serverDisclosureCheck,
     dmarcCheck,
+    ignoreScriptsCheck,
+    compromisedDepsCheck,
+    npmCiCheck,
+    selfHostedRunnerCheck,
   ];
 }
 

@@ -1,6 +1,6 @@
 /**
- * Recommended security tools — curated list for the Bastion web dashboard.
- * Includes free and paid tools across categories, with direct links.
+ * Recommended security tools for the Bastion web dashboard.
+ * Free and paid tools across categories, with direct links.
  */
 
 /** Pricing model for a security tool */
@@ -31,23 +31,23 @@ export interface SecurityTool {
 export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   {
     name: 'Bastion',
-    description: 'Security scanner for Cursor-generated code. Scans locally, never uploads code. 15 checks, fix explanations, and AI prompts.',
+    description: 'Security scanner that runs locally and never uploads your code. Checks headers, configs, and dependencies. Explains every finding and gives you an AI prompt to fix it.',
     category: 'static-analysis',
-    url: 'https://github.com/absastreon/bastion',
-    pricing: 'free',
+    url: 'https://github.com/ABS-Projects-2026/Bastion',
+    pricing: 'freemium',
     tags: ['cli', 'education', 'privacy-first', 'ai-prompts'],
   },
   {
     name: 'Skylos',
-    description: 'Dead code detection for TypeScript and JavaScript projects. Finds unused exports, functions, types, and modules to reduce attack surface.',
-    category: 'code-quality',
-    url: 'https://github.com/duriantaco/skylos',
-    pricing: 'free',
-    tags: ['dead-code', 'typescript', 'cli', 'treeshaking'],
+    description: 'SAST tool that uses ML to find code vulnerabilities. Catches patterns that rule-based scanners miss. Good complement to Bastion\'s config and header checks.',
+    category: 'static-analysis',
+    url: 'https://skylos.dev',
+    pricing: 'freemium',
+    tags: ['sast', 'ai', 'machine-learning', 'vulnerability-scanning', 'deep-analysis'],
   },
   {
     name: 'npm audit',
-    description: 'Built-in Node.js dependency vulnerability scanner. Checks installed packages against the GitHub Advisory Database.',
+    description: 'Built into Node.js. Checks your installed packages against the GitHub Advisory Database for known vulnerabilities.',
     category: 'dependency-scanning',
     url: 'https://docs.npmjs.com/cli/commands/npm-audit',
     pricing: 'free',
@@ -55,7 +55,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Snyk',
-    description: 'Developer-first security platform. Finds and fixes vulnerabilities in dependencies, container images, and infrastructure as code.',
+    description: 'Scans your dependencies, containers, and infrastructure-as-code for known vulnerabilities. Good CI integration and auto-fix PRs.',
     category: 'dependency-scanning',
     url: 'https://snyk.io',
     pricing: 'freemium',
@@ -63,7 +63,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'SonarCloud',
-    description: 'Cloud-based code quality and security analysis. Detects bugs, vulnerabilities, and code smells across 30+ languages.',
+    description: 'Hosted code quality and security scanner. Catches bugs, vulnerabilities, and code smells. Supports 30+ languages.',
     category: 'static-analysis',
     url: 'https://sonarcloud.io',
     pricing: 'freemium',
@@ -71,7 +71,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'OWASP ZAP',
-    description: 'Free, open-source dynamic application security testing (DAST) tool. Actively scans running web applications for vulnerabilities.',
+    description: 'Open-source scanner that tests your running web app for vulnerabilities. Finds XSS, injection, and misconfigurations by actually poking at your site.',
     category: 'dynamic-testing',
     url: 'https://www.zaproxy.org',
     pricing: 'free',
@@ -79,7 +79,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'eslint-plugin-security',
-    description: 'ESLint rules that identify potential security hotspots in Node.js code. Detects eval, non-literal requires, and timing attacks.',
+    description: 'ESLint plugin that flags security issues in Node.js code. Catches eval usage, non-literal requires, timing attacks, and other risky patterns.',
     category: 'static-analysis',
     url: 'https://github.com/eslint-community/eslint-plugin-security',
     pricing: 'free',
@@ -87,7 +87,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Secretlint',
-    description: 'Pluggable linting tool to prevent committing credentials. Supports AWS, GCP, npm tokens, private keys, and custom patterns.',
+    description: 'Catches leaked credentials before you commit them. Supports AWS keys, GCP tokens, npm tokens, private keys, and custom patterns.',
     category: 'secret-detection',
     url: 'https://github.com/secretlint/secretlint',
     pricing: 'free',
@@ -95,7 +95,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Helmet.js',
-    description: 'Express.js middleware that sets security-related HTTP headers. Configures CSP, HSTS, X-Frame-Options, and more with sensible defaults.',
+    description: 'Express middleware that sets security headers for you. Handles CSP, HSTS, X-Frame-Options, and more with good defaults out of the box.',
     category: 'runtime-protection',
     url: 'https://helmetjs.github.io',
     pricing: 'free',
@@ -103,7 +103,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Dependabot',
-    description: 'GitHub-native automated dependency updates. Creates pull requests for outdated and vulnerable dependencies with changelogs.',
+    description: 'Built into GitHub. Automatically opens PRs when your dependencies have updates or known vulnerabilities. Includes changelogs.',
     category: 'supply-chain',
     url: 'https://github.com/dependabot',
     pricing: 'free',
@@ -111,7 +111,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'GitHub Advanced Security',
-    description: 'Code scanning (CodeQL), secret scanning, and dependency review built into GitHub. Catches vulnerabilities in pull requests.',
+    description: 'CodeQL code scanning, secret detection, and dependency review right in GitHub. Flags issues directly in your pull requests.',
     category: 'static-analysis',
     url: 'https://github.com/features/security',
     pricing: 'freemium',
@@ -119,7 +119,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Trivy',
-    description: 'Comprehensive open-source vulnerability scanner. Scans container images, file systems, git repositories, and Kubernetes clusters.',
+    description: 'Open-source vulnerability scanner for containers, file systems, git repos, and Kubernetes. Fast and easy to add to CI.',
     category: 'dependency-scanning',
     url: 'https://trivy.dev',
     pricing: 'free',
@@ -127,7 +127,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Mozilla Observatory',
-    description: 'Free online tool that analyzes your website\'s HTTP headers, TLS configuration, and other security best practices. Provides a letter grade.',
+    description: 'Paste in your URL and get a letter grade for your HTTP headers and TLS setup. Quick way to spot missing security headers.',
     category: 'dynamic-testing',
     url: 'https://observatory.mozilla.org',
     pricing: 'free',
@@ -135,7 +135,7 @@ export const RECOMMENDED_TOOLS: readonly SecurityTool[] = [
   },
   {
     name: 'Sentry',
-    description: 'Application monitoring and error tracking platform. Security-relevant for detecting anomalous errors, tracking release health, and monitoring performance.',
+    description: 'Error tracking and performance monitoring. Useful for spotting unusual error spikes that might indicate an attack or a broken deploy.',
     category: 'monitoring',
     url: 'https://sentry.io',
     pricing: 'freemium',

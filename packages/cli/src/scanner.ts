@@ -10,7 +10,7 @@ import type {
   ScanContext,
   ScanReport,
   ScanSummary,
-} from 'bastion-shared';
+} from '@bastion/shared';
 import { getAllChecks, getUrlOnlyChecks, getStaticSiteSkippableChecks } from './checks/index.js';
 import { detectStack } from './detectors/stack.js';
 import { enrichWithAiPrompts } from './education/prompts.js';
@@ -123,8 +123,23 @@ export async function buildContext(options: {
   readonly url?: string;
   readonly verbose: boolean;
   readonly type?: 'auto' | 'static' | 'api' | 'fullstack';
+  readonly urlOnly?: boolean;
 }): Promise<ScanContext> {
   const projectPath = resolve(options.path);
+
+  // URL-only mode: skip filesystem scanning entirely
+  if (options.urlOnly) {
+    return {
+      projectPath,
+      url: options.url,
+      stack: { language: 'unknown' },
+      files: [],
+      verbose: options.verbose,
+      projectType: 'static',
+      projectTypeSource: 'auto',
+      urlOnly: true,
+    };
+  }
 
   const info = await stat(projectPath).catch(() => null);
   if (!info?.isDirectory()) {
@@ -211,12 +226,12 @@ const PROJECT_INDICATORS = ['package.json', '.gitignore', '.git', 'src', 'lib'];
 const CODE_EXTENSIONS = /\.(ts|js|tsx|jsx)$/;
 
 /** Check whether the scanned path contains a real project */
-function hasProjectFiles(files: readonly string[], projectPath: string, packageJson: Record<string, unknown> | undefined): boolean {
+function hasProjectFiles(files: readonly string[], _projectPath: string, packageJson: Record<string, unknown> | undefined): boolean {
   if (packageJson) return true;
 
   // Check for indicator files/directories in the file listing
   for (const f of files) {
-    const first = f.split('/')[0];
+    const first = f.split('/')[0] ?? '';
     if (PROJECT_INDICATORS.includes(first)) return true;
     if (CODE_EXTENSIONS.test(f)) return true;
   }
@@ -226,7 +241,7 @@ function hasProjectFiles(files: readonly string[], projectPath: string, packageJ
 
 /** Load checks and run them — auto-detects URL-only mode and static sites */
 export async function scan(context: ScanContext): Promise<ScanReport> {
-  const isUrlOnly = context.url && !hasProjectFiles(context.files, context.projectPath, context.packageJson);
+  const isUrlOnly = context.urlOnly || (!!context.url && !hasProjectFiles(context.files, context.projectPath, context.packageJson));
 
   if (isUrlOnly) {
     const report = await runChecks(context, getUrlOnlyChecks());

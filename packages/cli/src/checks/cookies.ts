@@ -2,7 +2,7 @@
  * Check: Cookie security flags
  * Inspects Set-Cookie headers for HttpOnly, Secure, and SameSite attributes.
  */
-import type { CheckFunction, CheckResult } from 'bastion-shared';
+import type { CheckFunction, CheckResult } from '@bastion/shared';
 import { fetchWithRetry } from '../utils/fetch-with-retry.js';
 
 const CHECK_ID = 'cookies';
@@ -10,7 +10,7 @@ const CATEGORY = 'cookies';
 
 /** Parse a Set-Cookie header and return the cookie name + which flags are present */
 function parseCookie(raw: string): { name: string; httpOnly: boolean; secure: boolean; sameSite: boolean } {
-  const name = raw.split('=')[0].trim();
+  const name = (raw.split('=')[0] ?? '').trim();
   const lower = raw.toLowerCase();
   return {
     name,

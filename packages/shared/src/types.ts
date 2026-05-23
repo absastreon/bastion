@@ -1,5 +1,5 @@
 /**
- * Core types shared across bastion-scan and the web dashboard
+ * Core types shared across @bastion/cli and @bastion/web
  */
 
 /** Severity levels for security findings */
@@ -45,6 +45,8 @@ export interface ScanContext {
   readonly projectType: ProjectType;
   /** Whether the project type was auto-detected or manually set */
   readonly projectTypeSource: 'auto' | 'manual';
+  /** True when running in URL-only mode (--url without explicit --path) */
+  readonly urlOnly?: boolean;
 }
 
 /** Result from a single check module */

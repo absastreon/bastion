@@ -5,13 +5,14 @@
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import { OUTPUT_FORMATS } from 'bastion-shared';
-import type { OutputFormat } from 'bastion-shared';
+import { OUTPUT_FORMATS } from '@bastion/shared';
+import type { OutputFormat } from '@bastion/shared';
 import { buildContext, scan } from './scanner.js';
 import { formatTerminalReport } from './reporters/terminal.js';
 import { formatJsonReport } from './reporters/json.js';
 import type { JsonReportMetadata } from './reporters/json.js';
 import { generateConfigs, formatConfigOutput, writeConfigFiles } from './generators/config.js';
+import { runSecurityTxtGenerator, type SecurityTxtOptions } from './generators/security-txt.js';
 
 interface RawScanOptions {
   readonly path: string;
@@ -22,6 +23,15 @@ interface RawScanOptions {
   readonly generateConfigs?: boolean;
   readonly outputDir?: string;
   readonly type: 'auto' | 'static' | 'api' | 'fullstack';
+  readonly urlOnly?: boolean;
+}
+
+/** Determine whether the scan should run in URL-only mode */
+export function computeUrlOnly(
+  options: { readonly url?: string },
+  command: { getOptionValueSource(key: string): string | undefined },
+): boolean {
+  return !!options.url && command.getOptionValueSource('path') === 'default';
 }
 
 /** Create and configure the Bastion CLI program */
@@ -48,8 +58,8 @@ export function createProgram(version: string): Command {
         .choices(['auto', 'static', 'api', 'fullstack'])
         .default('auto'),
     )
-    .action(async (options: RawScanOptions) => {
-      await runScan(options, version);
+    .action(async (options: RawScanOptions, command: Command) => {
+      await runScan({ ...options, urlOnly: computeUrlOnly(options, command) }, version);
     });
 
   const generate = program
@@ -108,6 +118,7 @@ async function runScan(options: RawScanOptions, version: string): Promise<void> 
       url: options.url,
       verbose: options.verbose,
       type: options.type,
+      urlOnly: options.urlOnly,
     });
 
     const report = await scan(context);
