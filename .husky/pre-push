@@ -1,0 +1,13 @@
+# Pre-push gate: typecheck + full test suite.
+#
+# This repo's main is a DERIVED ARTIFACT of the private monorepo
+# (ABS-Projects-2026/Bastion); its mirror-sync action force-pushes main on
+# every merge there. Human pushes to this repo should not happen at all
+# post-Approach-B. This hook is defence in depth only, for the exceptional
+# sanctioned push: this is the publish-canonical repo for bastion-scan, so
+# anything pushed from a workstation must typecheck and pass the suite.
+# (The sync action pushes with HUSKY=0; its own gate already ran the same
+# suite against the derived tree.)
+# Build before test, same order as the sync gate and release.yml: cli value
+# imports resolve via shared/dist, so fresh or stale checkouts fail 4 tests unbuilt.
+npm run typecheck && npm run build && npm run test
