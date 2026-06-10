@@ -179,7 +179,7 @@ describe('ssl check', () => {
   // -------------------------------------------------------------------------
 
   describe('when URL uses HTTP', () => {
-    it('returns a critical finding for no HTTPS', async () => {
+    it('returns a high finding for no HTTPS (R2: cleartext is misconfig, not exploit)', async () => {
       setupHttpRedirect(301, 'https://example.com/');
       const results = await sslCheck(
         makeContext({ url: 'http://example.com' }),
@@ -188,7 +188,9 @@ describe('ssl check', () => {
       const noHttps = results.find((r) => r.id === 'ssl-no-https');
       expect(noHttps).toBeDefined();
       expect(noHttps?.status).toBe('fail');
-      expect(noHttps?.severity).toBe('critical');
+      // R2 calibration: invalid-cert stays critical (active MitM); plain HTTP
+      // drops to high (user-controlled misconfig, not an active exploit).
+      expect(noHttps?.severity).toBe('high');
       expect(noHttps?.description).toContain('plain HTTP');
     });
 
@@ -582,7 +584,8 @@ describe('ssl check', () => {
       expect(results).toHaveLength(2);
       const fails = results.filter((r) => r.status === 'fail');
       expect(fails).toHaveLength(2);
-      expect(fails.some((r) => r.severity === 'critical')).toBe(true);
+      // R2: no-https is high (was critical), no-redirect is medium.
+      expect(fails.some((r) => r.id === 'ssl-no-https' && r.severity === 'high')).toBe(true);
       expect(fails.some((r) => r.severity === 'medium')).toBe(true);
     });
 

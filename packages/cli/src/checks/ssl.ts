@@ -189,7 +189,10 @@ const sslCheck: CheckFunction = async (context) => {
       id: `${CHECK_ID}-no-https`,
       name: 'URL does not use HTTPS',
       status: 'fail',
-      severity: 'critical',
+      // R2 calibration: cleartext transit is a real risk but a misconfiguration
+      // the user controls (and self-selected by typing http://). Invalid-cert
+      // stays critical (active MitM risk); this drops to high.
+      severity: 'high',
       category: CATEGORY,
       location: context.url,
       description: `${context.url} uses plain HTTP. All traffic is unencrypted, exposing user data to interception.`,

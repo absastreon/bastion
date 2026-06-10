@@ -152,7 +152,7 @@ The web dashboard lives at [bastion.wiki](https://bastion.wiki).
 
 | | Free | Pro | Team |
 |---|---|---|---|
-| **Price** | £0 | £4/mo or £39/yr | £15/mo or £119/yr |
+| **Price** | £0 | £19/mo or £179/yr | £49/mo or £469/yr |
 | URL scans | Unlimited | Unlimited | Unlimited |
 | CLI scans | 10/month | Unlimited | Unlimited |
 | AI fix prompts | — | Unlimited | Unlimited |

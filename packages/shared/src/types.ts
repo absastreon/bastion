@@ -2,7 +2,27 @@
  * Core types shared across @bastion/cli and @bastion/web
  */
 
-/** Severity levels for security findings */
+/**
+ * Severity levels for security findings.
+ *
+ * Calibration rubric (R2, 26 May 2026) — apply when adding new checks so the
+ * scale stays trustworthy. When Bastion says "critical", users must be able to
+ * believe it; over-rating drives them to discount real criticals.
+ *
+ * - **critical** — Active exploitability with no further preconditions. A
+ *   leaked credential matched in source, an exploitable injection sink, an
+ *   invalid/expired TLS certificate. If shipping this means an attacker can
+ *   act today, it's critical.
+ * - **high** — Misconfiguration that becomes exploitable under common dev
+ *   mistakes: missing .gitignore patterns for secret-bearing files, missing
+ *   auth or rate-limit, plain HTTP transit, exposed PEM/key patterns. The
+ *   pre-condition is realistic, not certain.
+ * - **medium** — Hygiene / defense-in-depth: missing security headers,
+ *   missing security.txt, missing DMARC, build-output noise, generic
+ *   supply-chain hardening.
+ * - **low** — Minor advisory; nice-to-fix.
+ * - **info** — Informational only (passing checks, skipped checks, context).
+ */
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 
 /** Output format for scan results */

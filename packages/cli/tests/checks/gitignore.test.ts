@@ -154,13 +154,15 @@ describe('gitignoreCheck', () => {
     await rm(testDir, { recursive: true, force: true });
   });
 
-  it('returns critical fail when .gitignore is missing', async () => {
+  it('returns high fail when .gitignore is missing (R2: hygiene, not active exploitability)', async () => {
     const results = await gitignoreCheck(makeContext(testDir));
 
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('gitignore-missing');
     expect(results[0].status).toBe('fail');
-    expect(results[0].severity).toBe('critical');
+    // R2 calibration: critical reserved for active exploitability. A missing
+    // .gitignore is a precondition for leaks, not a leak itself.
+    expect(results[0].severity).toBe('high');
     expect(results[0].fix).toBeDefined();
     expect(results[0].aiPrompt).toContain('javascript');
   });
@@ -192,7 +194,7 @@ describe('gitignoreCheck', () => {
     expect(results[0].status).toBe('pass');
   });
 
-  it('sets correct severity for .env (critical)', async () => {
+  it('sets correct severity for .env (high — R2 calibration)', async () => {
     // Only include everything except .env
     const content = ['.env.local', 'node_modules', '*.pem', '*.key', '.next', 'dist', 'build', '.DS_Store'].join('\n');
     await writeFile(join(testDir, '.gitignore'), content);
@@ -200,7 +202,36 @@ describe('gitignoreCheck', () => {
 
     const envResult = results.find((r) => r.id === 'gitignore-env');
     expect(envResult).toBeDefined();
-    expect(envResult?.severity).toBe('critical');
+    // R2: aligned with *.pem / *.key — whole "secret-leak family" sits at high.
+    expect(envResult?.severity).toBe('high');
+  });
+
+  // R2 regression guard: the whole secret-leak family must stay at one level
+  // (high). If any check author drifts these to critical or medium, this fails.
+  it('R2 regression: all secret-leak gitignore findings sit at "high"', async () => {
+    // Empty .gitignore → every required entry fires
+    await writeFile(join(testDir, '.gitignore'), '# empty\n');
+    const results = await gitignoreCheck(makeContext(testDir));
+
+    const secretLeakIds = [
+      'gitignore-env',
+      'gitignore-env-local',
+      'gitignore-node-modules',
+      'gitignore-pem',
+      'gitignore-key',
+    ];
+    for (const id of secretLeakIds) {
+      const r = results.find((x) => x.id === id);
+      expect(r, `expected ${id} in results`).toBeDefined();
+      expect(r?.severity, `${id} must be 'high' per R2 rubric`).toBe('high');
+    }
+
+    // Hygiene-only entries stay at medium (build/OS noise — not secret-leak)
+    const hygieneIds = ['gitignore-next', 'gitignore-dist', 'gitignore-build', 'gitignore-ds-store'];
+    for (const id of hygieneIds) {
+      const r = results.find((x) => x.id === id);
+      expect(r?.severity, `${id} must be 'medium' per R2 rubric`).toBe('medium');
+    }
   });
 
   it('sets correct severity for node_modules (high)', async () => {

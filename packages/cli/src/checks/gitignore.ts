@@ -22,7 +22,11 @@ const REQUIRED_ENTRIES: readonly RequiredEntry[] = [
   {
     id: 'gitignore-env',
     pattern: '.env',
-    severity: 'critical',
+    // R2 calibration: pattern-only check (no existence verification) — a missing
+    // ignore is pre-condition risk, not active exploitability. Aligned with
+    // gitignore-pem / gitignore-key at `high` so the whole "secret-leak family"
+    // sits at one level.
+    severity: 'high',
     description: 'Environment file (.env) is not gitignored — secrets may be committed',
     fix: 'Add `.env` to your .gitignore file',
     aiPrompt:
@@ -31,7 +35,8 @@ const REQUIRED_ENTRIES: readonly RequiredEntry[] = [
   {
     id: 'gitignore-env-local',
     pattern: '.env.local',
-    severity: 'critical',
+    // R2 calibration: see gitignore-env — same secret-leak pre-condition family.
+    severity: 'high',
     description: 'Local environment file (.env.local) is not gitignored — secrets may be committed',
     fix: 'Add `.env.local` to your .gitignore (or `.env*` to cover all env variants)',
     aiPrompt:
@@ -186,7 +191,11 @@ const gitignoreCheck: CheckFunction = async (context) => {
           id: 'gitignore-missing',
           name: '.gitignore coverage',
           status: 'fail',
-          severity: 'critical',
+          // R2 calibration: hygiene gap, not active exploitability. The actual
+          // secret-leak risk surfaces via secrets.ts (which scans file contents);
+          // a missing .gitignore is a pre-condition that *enables* such leaks if
+          // the developer then commits naively.
+          severity: 'high',
           category: 'configuration',
           description:
             'No .gitignore file found — sensitive files, dependencies, and build artifacts may be committed',

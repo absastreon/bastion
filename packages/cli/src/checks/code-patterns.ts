@@ -12,8 +12,43 @@ import type { CheckFunction, CheckResult, Severity } from '@bastion/shared';
 /** File extensions to scan for insecure code patterns */
 const CODE_EXTENSIONS = new Set(['.ts', '.js', '.tsx', '.jsx']);
 
-/** Directory segments to skip */
-const IGNORED_DIRS = new Set(['node_modules', 'dist', 'build', '.git', 'tests', '__tests__', 'test', 'fixtures']);
+/**
+ * Directory segments to skip — node_modules + build/output dirs across common
+ * frameworks. We skip mobile-app shipped bundles (`ios`, `android`, `.aab_check`)
+ * because Capacitor/React Native projects copy minified web bundles into them,
+ * which would otherwise triple-count every finding from `src/`.
+ */
+const IGNORED_DIRS = new Set([
+  'node_modules',
+  'dist',
+  'build',
+  '.git',
+  'tests',
+  '__tests__',
+  'test',
+  'fixtures',
+  // Framework build/output dirs
+  'out',
+  '.next',
+  '.nuxt',
+  '.svelte-kit',
+  '.output',
+  '.turbo',
+  '.cache',
+  '.parcel-cache',
+  '.vercel',
+  // Test/coverage output
+  'coverage',
+  'storybook-static',
+  // Mobile platform bundles (Capacitor / React Native ship minified web assets here)
+  'ios',
+  'android',
+  '.aab_check',
+  '.expo',
+]);
+
+/** Max longest-line length before we treat a file as minified/bundled and skip it */
+const MINIFIED_LINE_THRESHOLD = 1000;
 
 /** A pattern definition for insecure code */
 interface PatternDef {
@@ -63,7 +98,19 @@ const PATTERN_DEFS: readonly PatternDef[] = [
     id: 'sql-injection',
     name: 'SQL string concatenation',
     severity: 'critical',
-    regex: /\b(?:SELECT\s+|INSERT\s+INTO\s+|UPDATE\s+|DELETE\s+FROM\s+)[^;]*?(?:\$\{|['"]\s*\+)/i,
+    // Grammar-anchored — requires real SQL structure, not just the English word
+    // "update". This kills false positives like
+    //   toast.error('Failed to update X: ' + err)
+    //   console.error(`Failed to update DB for ${sym}`)
+    // while still matching real injectable queries.
+    //
+    //   UPDATE <ident> SET ...       (SET disambiguates from English "update X")
+    //   DELETE FROM <ident> WHERE …  (WHERE disambiguates from prose)
+    //   INSERT INTO <ident> … (      (paren marks column-list / VALUES tuple)
+    //   SELECT <cols> FROM <ident>   (FROM disambiguates from "please select…")
+    // …followed by interpolation (`${`) or string-concat (`' +` / `" +`).
+    regex:
+      /(?:UPDATE\s+\S+\s+SET\b|DELETE\s+FROM\s+\S+\s+WHERE\b|INSERT\s+INTO\s+\S+[^;]*?\(|SELECT\s+[\w*,\s.]+?\s+FROM\s+\S+)[^;]*?(?:\$\{|['"]\s*\+)/i,
     fix: 'Use parameterized queries or a query builder. Never concatenate user input into SQL strings.',
     aiPromptTemplate: (stack) => {
       const db = stack?.database;
@@ -133,6 +180,26 @@ function isSqlDisplayContext(trimmed: string): boolean {
   return false;
 }
 
+/**
+ * Heuristic: a file is "minified/bundled" if any single line exceeds
+ * MINIFIED_LINE_THRESHOLD chars. Catches webpack/vite/esbuild output regardless
+ * of where the framework drops it — a safety net for the IGNORED_DIRS list.
+ */
+function isLikelyMinified(content: string): boolean {
+  if (content.length < MINIFIED_LINE_THRESHOLD) return false;
+  // Scan without a full split — short-circuit on the first long line
+  let lineLen = 0;
+  for (let i = 0; i < content.length; i++) {
+    if (content.charCodeAt(i) === 10 /* \n */) {
+      lineLen = 0;
+    } else {
+      lineLen++;
+      if (lineLen > MINIFIED_LINE_THRESHOLD) return true;
+    }
+  }
+  return false;
+}
+
 /** Check whether a file path is a code file that should be scanned */
 function isCodeFile(relativePath: string): boolean {
   const segments = relativePath.split('/');
@@ -152,6 +219,9 @@ function scanFileContent(
   relativePath: string,
   stack?: StackHint,
 ): readonly CheckResult[] {
+  // Skip minified / bundled output — they re-trigger every finding from src/.
+  if (isLikelyMinified(content)) return [];
+
   const lines = content.split('\n');
   const results: CheckResult[] = [];
 
@@ -257,4 +327,4 @@ const codePatternCheck: CheckFunction = async (context) => {
 export default codePatternCheck;
 
 // Exported for testing
-export { isCodeFile, scanFileContent, PATTERN_DEFS };
+export { isCodeFile, scanFileContent, PATTERN_DEFS, isLikelyMinified };

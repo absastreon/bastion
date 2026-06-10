@@ -5,7 +5,7 @@ import type { ScanContext } from '@bastion/shared';
 
 // This test verifies scan()'s ROUTING: that it calls getUrlOnlyChecks()
 // when urlOnly is set and getAllChecks() otherwise. The check getters are
-// mocked, so this does NOT verify the real getters' contents — each check's
+// mocked, so this does NOT verify the real getters' contents - each check's
 // real behaviour is covered by its own dedicated test file. Stub IDs are
 // internal to this test and chosen to be distinguishable, not to match
 // production IDs exactly.
@@ -62,7 +62,7 @@ import { computeUrlOnly } from '../src/cli.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = resolve(__dirname, 'fixtures');
 
-/** IDs of checks that require source code — must not appear in URL-only mode */
+/** IDs of checks that require source code - must not appear in URL-only mode */
 const CODE_CHECK_IDS = [
   'gitignore', 'secrets', 'dep-vuln', 'env-example',
   'security-txt', 'code-patterns', 'cors', 'rate-limit', 'auth',
@@ -104,7 +104,7 @@ describe('URL-only mode (Bastion#1 regression)', () => {
 
     expect(report.urlOnly).toBe(true);
 
-    // Only URL checks should appear — no code-based checks
+    // Only URL checks should appear - no code-based checks
     const resultIds = report.results.map((r) => r.id);
     for (const codeId of CODE_CHECK_IDS) {
       expect(resultIds, `code check "${codeId}" should not run in URL-only mode`).not.toContain(codeId);

@@ -1,7 +1,8 @@
 /**
  * @bastion/shared — Types, constants, and data shared across packages
  */
-export const VERSION = '0.1.0';
+/** Must track packages/shared/package.json "version" — rootDir prevents JSON import */
+export const VERSION = '0.2.1';
 
 export { OUTPUT_FORMATS } from './types.js';
 

@@ -2,6 +2,7 @@
  * CLI program setup — Commander.js configuration
  * Separated from index.ts for testability
  */
+import { writeFile } from 'node:fs/promises';
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -11,6 +12,7 @@ import { buildContext, scan } from './scanner.js';
 import { formatTerminalReport } from './reporters/terminal.js';
 import { formatJsonReport } from './reporters/json.js';
 import type { JsonReportMetadata } from './reporters/json.js';
+import { writeMarkdownReport } from './reporters/markdown.js';
 import { generateConfigs, formatConfigOutput, writeConfigFiles } from './generators/config.js';
 import { runSecurityTxtGenerator, type SecurityTxtOptions } from './generators/security-txt.js';
 
@@ -82,7 +84,7 @@ export function createProgram(version: string): Command {
   return program;
 }
 
-async function runScan(options: RawScanOptions, version: string): Promise<void> {
+export async function runScan(options: RawScanOptions, version: string): Promise<void> {
   const isJson = options.format === 'json';
 
   if (!isJson) {
@@ -132,7 +134,16 @@ async function runScan(options: RawScanOptions, version: string): Promise<void> 
         projectType: report.projectType,
         projectTypeSource: report.projectTypeSource,
       };
-      console.log(formatJsonReport(report, metadata));
+      const json = formatJsonReport(report, metadata);
+      if (options.output) {
+        await writeFile(options.output, json, 'utf-8');
+      } else {
+        console.log(json);
+      }
+    } else if (options.format === 'markdown') {
+      spinner?.succeed(`Scan complete (${report.duration}ms)`);
+      const outputPath = await writeMarkdownReport(report, context, version, options.output);
+      console.log(chalk.green(`\n  ✓ Markdown report written to ${outputPath}\n`));
     } else {
       spinner?.succeed(`Scan complete (${report.duration}ms)`);
       if (report.urlOnly) {
