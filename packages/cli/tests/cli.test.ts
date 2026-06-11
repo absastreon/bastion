@@ -121,4 +121,23 @@ describe('scan command options', () => {
   it('rejects invalid --type values', () => {
     expect(() => parseScanOptions(['scan', '--type', 'invalid'])).toThrow();
   });
+
+  it('defaults --fail-on to undefined (findings never affect exit code without it)', () => {
+    const opts = parseScanOptions(['scan']);
+    expect(opts['failOn']).toBeUndefined();
+  });
+
+  it('parses --fail-on with a canonical level', () => {
+    const opts = parseScanOptions(['scan', '--fail-on', 'high']);
+    expect(opts['failOn']).toBe('high');
+  });
+
+  it('accepts the any alias for --fail-on', () => {
+    const opts = parseScanOptions(['scan', '--fail-on', 'any']);
+    expect(opts['failOn']).toBe('any');
+  });
+
+  it('rejects invalid --fail-on values', () => {
+    expect(() => parseScanOptions(['scan', '--fail-on', 'bogus'])).toThrow();
+  });
 });

@@ -22,6 +22,14 @@
  *   supply-chain hardening.
  * - **low** — Minor advisory; nice-to-fix.
  * - **info** — Informational only (passing checks, skipped checks, context).
+ *
+ * Third-party exemption (decided 11 June 2026, disposition ledger 2.7):
+ * severities imported from third-party advisories — the npm audit
+ * pass-through in dep-vuln findings — are reported verbatim and are EXEMPT
+ * from this rubric. The rubric calibrates Bastion's own checks; upstream
+ * advisories carry upstream's calibration, and users can cross-reference the
+ * linked GHSA. The pressure valve for noisy dev-dependency criticals in CI is
+ * the --fail-on threshold (and the baseline file), not severity rewriting.
  */
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 

@@ -126,9 +126,30 @@ Options:
   -f, --format <type>       Output format: terminal, json, markdown
   -u, --url <url>           Live URL to scan (headers, SSL, security.txt)
   -v, --verbose             Show fix instructions and AI prompts
+  -o, --output <file>       Output file path (for markdown/json formats)
+  --fail-on <level>         Exit 1 if any failed check is at or above this
+                            severity: critical, high, medium, low, warn
+                            (warn is strictest; any = alias for warn)
   --generate-configs        Print security config snippets for your stack
   --output-dir <dir>        Write config files to directory
 ```
+
+### Exit codes
+
+Findings affect the exit code only when you pass `--fail-on`. Without it, a
+completed scan exits 0 regardless of findings.
+
+| Code | Meaning |
+|------|---------|
+| 0 | Scan completed; no failed check at or above the `--fail-on` threshold (or no flag given) |
+| 1 | Scan completed; findings at or above the threshold (only with `--fail-on`) |
+| 2 | Scan error — the scan could not complete |
+| 3 | Usage error — invalid flag or option value |
+
+`--fail-on warn` is the strictest level: any failed check of any severity, or
+any warn-status result, exits 1. The severity ladder for the other levels is
+critical > high > medium > low; info-severity findings sit below `low` and
+only trip `warn`.
 
 ---
 
@@ -188,7 +209,7 @@ jobs:
       - uses: absastreon/bastion-action@v1
         with:
           path: '.'
-          fail-on: 'critical'    # Block PRs with critical findings
+          fail-on-critical: 'true'    # Block PRs with critical findings
           format: 'markdown'     # Comment results on PR
 ```
 

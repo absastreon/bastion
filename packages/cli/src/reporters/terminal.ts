@@ -2,27 +2,52 @@
  * Terminal reporter — formatted console output for scan results
  */
 import chalk from 'chalk';
-import type { CheckResult, ScanReport } from '@bastion/shared';
+import type { CheckResult, ScanReport, Severity } from '@bastion/shared';
 
-/** Icon for a check result based on status and severity */
+/** Colour a string by severity (used for fail glyphs and severity tags) */
+function severityColour(severity: Severity, text: string): string {
+  switch (severity) {
+    case 'critical':
+      return chalk.red(text);
+    case 'high':
+      return chalk.yellow(text);
+    case 'medium':
+      return chalk.blue(text);
+    case 'low':
+    case 'info':
+      return chalk.dim(text);
+  }
+}
+
+/**
+ * Icon for a check result. Glyph encodes STATUS; colour encodes severity on
+ * failures (H-25 fix, 11 June 2026): every fail is ✕, warn-status is !, so
+ * what you count on screen matches the footer's status counts. The old scheme
+ * rendered fail/high and warn-status identically (yellow ⚠).
+ */
 function resultIcon(result: CheckResult): string {
   if (result.status === 'pass') return chalk.green('✓');
   if (result.status === 'skip') return chalk.dim('–');
   if (result.status === 'not-applicable') return chalk.dim('○');
-  if (result.status === 'warn') return chalk.yellow('⚠');
+  if (result.status === 'warn') return chalk.yellow('!');
+  return severityColour(result.severity, '✕');
+}
 
-  switch (result.severity) {
-    case 'critical':
-      return chalk.red('✕');
-    case 'high':
-      return chalk.yellow('⚠');
-    case 'medium':
-      return chalk.blue('●');
-    case 'low':
-      return chalk.dim('○');
-    case 'info':
-      return chalk.dim('·');
+/** Severity tag appended to failed-check lines, e.g. "[critical]" */
+function severityTag(result: CheckResult): string {
+  if (result.status !== 'fail') return '';
+  return ` ${severityColour(result.severity, `[${result.severity}]`)}`;
+}
+
+/** Severity breakdown for the footer, e.g. "2 critical · 3 high" (non-zero only) */
+function failBreakdown(results: readonly CheckResult[]): string {
+  const order: readonly Severity[] = ['critical', 'high', 'medium', 'low', 'info'];
+  const parts: string[] = [];
+  for (const sev of order) {
+    const n = results.filter((r) => r.status === 'fail' && r.severity === sev).length;
+    if (n > 0) parts.push(severityColour(sev, `${n} ${sev}`));
   }
+  return parts.join(' · ');
 }
 
 /** Format score with color: green ≥80, yellow ≥50, red <50 */
@@ -80,7 +105,7 @@ export function formatTerminalReport(
         continue;
       }
       const loc = r.location ? chalk.dim(` ${r.location}`) : '';
-      lines.push(`    ${resultIcon(r)} ${r.name}${loc}`);
+      lines.push(`    ${resultIcon(r)} ${r.name}${severityTag(r)}${loc}`);
       lines.push(`      ${chalk.dim(r.description)}`);
 
       if (verbose && r.fix) {
@@ -96,12 +121,21 @@ export function formatTerminalReport(
 
   lines.push('');
 
-  const parts = [`${pass} passed`, `${fail} failed`, `${warn} warnings`, `${skip} skipped`];
+  const parts = [
+    `${pass} passed`,
+    `${fail} failed`,
+    `${warn} ${warn === 1 ? 'warning' : 'warnings'}`,
+    `${skip} skipped`,
+  ];
   if (notApplicable > 0) {
     parts.push(`${notApplicable} N/A`);
   }
   parts.push(`Score: ${formatScore(report.score)} (based on ${checksRun} of ${total} checks)`);
   lines.push(`  ${parts.join(' · ')}`);
+
+  if (fail > 0) {
+    lines.push(`  ${chalk.dim('failed by severity:')} ${failBreakdown(report.results)}`);
+  }
 
   if (skip > 0 && skip > total / 2) {
     lines.push(

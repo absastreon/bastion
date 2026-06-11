@@ -61,7 +61,7 @@ describe('formatTerminalReport', () => {
     expect(output).toContain('Gitignore check');
   });
 
-  it('renders correct severity icons for failures', () => {
+  it('renders every failure as ✕ with a severity tag (H-25 scheme: glyph = status)', () => {
     const output = strip(
       formatTerminalReport(
         makeReport(
@@ -76,13 +76,16 @@ describe('formatTerminalReport', () => {
         false,
       ),
     );
-    expect(output).toContain('✕');
-    expect(output).toContain('⚠');
-    expect(output).toContain('●');
-    expect(output).toContain('○');
+    expect(output).toContain('✕ Crit [critical]');
+    expect(output).toContain('✕ High [high]');
+    expect(output).toContain('✕ Med [medium]');
+    expect(output).toContain('✕ Low [low]');
+    // The old severity glyphs are gone — fail/high no longer collides with warn-status
+    expect(output).not.toContain('⚠');
+    expect(output).not.toContain('●');
   });
 
-  it('renders warn and skip icons', () => {
+  it('renders warn-status as ! (distinct from any failure glyph) and skip as –', () => {
     const output = strip(
       formatTerminalReport(
         makeReport([
@@ -92,8 +95,24 @@ describe('formatTerminalReport', () => {
         false,
       ),
     );
-    expect(output).toContain('⚠');
+    expect(output).toContain('! Warn check');
     expect(output).toContain('–');
+    expect(output).not.toContain('⚠');
+    expect(output).not.toContain('✕');
+  });
+
+  it('does not tag non-fail results with severity', () => {
+    const output = strip(
+      formatTerminalReport(
+        makeReport([
+          makeResult({ status: 'pass', severity: 'info', name: 'Pass check' }),
+          makeResult({ status: 'warn', severity: 'medium', name: 'Warn check' }),
+        ]),
+        false,
+      ),
+    );
+    expect(output).not.toContain('[info]');
+    expect(output).not.toContain('[medium]');
   });
 
   it('shows location when present', () => {
@@ -177,10 +196,50 @@ describe('formatTerminalReport', () => {
     );
     expect(output).toContain('2 passed');
     expect(output).toContain('1 failed');
-    expect(output).toContain('1 warnings');
+    expect(output).toContain('1 warning');
+    expect(output).not.toContain('1 warnings');
     expect(output).toContain('1 skipped');
     expect(output).toContain('90/100');
     expect(output).toContain('based on 4 of 5 checks');
+  });
+
+  it('pluralises warnings when there are several', () => {
+    const output = strip(
+      formatTerminalReport(
+        makeReport([
+          makeResult({ status: 'warn', severity: 'medium' }),
+          makeResult({ status: 'warn', severity: 'medium' }),
+        ]),
+        false,
+      ),
+    );
+    expect(output).toContain('2 warnings');
+  });
+
+  it('shows a severity breakdown line when failures exist, non-zero severities only', () => {
+    const output = strip(
+      formatTerminalReport(
+        makeReport(
+          [
+            makeResult({ status: 'fail', severity: 'critical' }),
+            makeResult({ status: 'fail', severity: 'high' }),
+            makeResult({ status: 'fail', severity: 'high' }),
+            makeResult({ status: 'pass' }),
+          ],
+          40,
+        ),
+        false,
+      ),
+    );
+    expect(output).toContain('failed by severity: 1 critical · 2 high');
+    expect(output).not.toContain('0 medium');
+  });
+
+  it('omits the severity breakdown when nothing failed', () => {
+    const output = strip(
+      formatTerminalReport(makeReport([makeResult({ status: 'pass' })]), false),
+    );
+    expect(output).not.toContain('failed by severity');
   });
 
   it('shows skip note when more than half checks are skipped', () => {

@@ -15,6 +15,7 @@ import type { JsonReportMetadata } from './reporters/json.js';
 import { writeMarkdownReport } from './reporters/markdown.js';
 import { generateConfigs, formatConfigOutput, writeConfigFiles } from './generators/config.js';
 import { runSecurityTxtGenerator, type SecurityTxtOptions } from './generators/security-txt.js';
+import { FAIL_ON_CHOICES, FAIL_ON_LEVELS, normalizeFailOn, countAtOrAbove } from './utils/fail-on.js';
 
 interface RawScanOptions {
   readonly path: string;
@@ -26,6 +27,7 @@ interface RawScanOptions {
   readonly outputDir?: string;
   readonly type: 'auto' | 'static' | 'api' | 'fullstack';
   readonly urlOnly?: boolean;
+  readonly failOn?: string;
 }
 
 /** Determine whether the scan should run in URL-only mode */
@@ -39,6 +41,13 @@ export function computeUrlOnly(
 /** Create and configure the Bastion CLI program */
 export function createProgram(version: string): Command {
   const program = new Command();
+
+  // Exit-code contract: usage errors must exit 3, never Commander's default 1
+  // (1 is reserved for findings). exitOverride makes Commander throw instead
+  // of exiting; the entry point catches and maps. It MUST be set before the
+  // subcommands are created — the callback is copied to them at creation time
+  // (verified against commander 14; set after, subcommands still process.exit).
+  program.exitOverride();
 
   program
     .name('bastion')
@@ -59,6 +68,12 @@ export function createProgram(version: string): Command {
       new Option('-t, --type <type>', 'project type override')
         .choices(['auto', 'static', 'api', 'fullstack'])
         .default('auto'),
+    )
+    .addOption(
+      new Option(
+        '--fail-on <level>',
+        'exit 1 if any failed check is at or above this severity; warn is strictest (any = alias)',
+      ).choices([...FAIL_ON_CHOICES]),
     )
     .action(async (options: RawScanOptions, command: Command) => {
       await runScan({ ...options, urlOnly: computeUrlOnly(options, command) }, version);
@@ -95,7 +110,7 @@ export async function runScan(options: RawScanOptions, version: string): Promise
     console.error(
       chalk.red(`\n  Error: Invalid format "${options.format}". Use: ${OUTPUT_FORMATS.join(', ')}`),
     );
-    process.exitCode = 1;
+    process.exitCode = 3; // usage error, per the exit-code contract
     return;
   }
 
@@ -178,8 +193,25 @@ export async function runScan(options: RawScanOptions, version: string): Promise
       }
     }
 
-    if (report.summary.fail > 0) {
-      process.exitCode = 1;
+    // Exit-code contract (11 June 2026): findings affect the exit code only
+    // when --fail-on is given. Without it the scan exits 0 regardless of
+    // findings (deliberate change from the pre-0.2.3 exit-1-on-any-fail).
+    if (options.failOn) {
+      const level = normalizeFailOn(options.failOn);
+      if (level === null) {
+        // Unreachable via Commander (choices validate), kept for direct runScan calls
+        console.error(chalk.red(`\n  Error: Invalid --fail-on "${options.failOn}". Use: ${FAIL_ON_CHOICES.join(', ')}`));
+        process.exitCode = 3;
+        return;
+      }
+      if (countAtOrAbove(report.results, level) > 0) {
+        process.exitCode = 1;
+      }
+    } else if (!isJson && options.format === 'terminal' && report.summary.fail > 0) {
+      console.log(
+        chalk.dim(`  Tip: gate CI on these findings with --fail-on ${FAIL_ON_LEVELS.join('|')}`),
+      );
+      console.log('');
     }
   } catch (error) {
     if (isJson) {
@@ -190,7 +222,7 @@ export async function runScan(options: RawScanOptions, version: string): Promise
         chalk.red(`\n  ${error instanceof Error ? error.message : String(error)}\n`),
       );
     }
-    process.exitCode = 1;
+    process.exitCode = 2; // scan error, per the exit-code contract
   }
 }
 
