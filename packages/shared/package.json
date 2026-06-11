@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@bastion/shared",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Internal types and data shared by Bastion packages. See bastion-scan for the user-facing tool.",
   "type": "module",
   "license": "MIT",

@@ -5,7 +5,6 @@
 
 <p align="center">
   <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/absastreon/bastion/ci.yml?branch=main&style=flat-square" />
-  <img alt="Tests" src="https://img.shields.io/badge/tests-783%20passing-brightgreen?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
   <img alt="npm" src="https://img.shields.io/npm/v/bastion-scan?style=flat-square" />
 </p>
@@ -154,17 +153,10 @@ The web dashboard lives at [bastion.wiki](https://bastion.wiki).
 |---|---|---|---|
 | **Price** | £0 | £19/mo or £179/yr | £49/mo or £469/yr |
 | URL scans | Unlimited | Unlimited | Unlimited |
-| CLI scans | 10/month | Unlimited | Unlimited |
-| AI fix prompts | — | Unlimited | Unlimited |
-| Config generators | — | Yes | Yes |
 | Security badge | — | Yes | Yes |
-| GitHub Action | — | Public repos | All repos |
-| Projects | 1 | 3 | Unlimited |
 | Compliance reports | — | — | Yes |
-| CVE alerts | — | — | Yes |
-| Score history | — | — | Yes |
 
-Annual plans save 2 months. All plans come with a 14-day free trial.
+Annual plans save 2 months.
 
 ---
 
@@ -222,9 +214,9 @@ Floor is 0. Only `fail` results deduct. `warn`, `skip`, and `pass` don't affect 
 ```
 bastion/
 ├── packages/
-│   ├── cli/          # npx bastion-scan scan, 15 checks, 3 reporters
+│   ├── cli/          # npx bastion-scan scan: security checks and reporters
 │   ├── shared/       # Types, checklist data, OWASP data, tools
-│   └── web/          # Next.js 14 dashboard
+│   └── web/          # Next.js dashboard
 └── docs/playbooks/   # Stack-specific security guides
 ```
 

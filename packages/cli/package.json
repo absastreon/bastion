@@ -1,7 +1,7 @@
 {
   "name": "bastion-scan",
-  "version": "0.2.1",
-  "description": "Privacy-first security checker for web projects. 15 checks, zero data uploaded, actionable fixes.",
+  "version": "0.2.2",
+  "description": "Privacy-first security checker for web projects. Zero data uploaded, actionable fixes.",
   "type": "module",
   "bin": {
     "bastion": "./dist/index.js"
