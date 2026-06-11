@@ -7,13 +7,12 @@ If you discover a security vulnerability in Bastion, please report it responsibl
 **Email:** [security@bastion.wiki](mailto:security@bastion.wiki)
 **Preferred:** [GitHub Security Advisories](https://github.com/absastreon/bastion/security/advisories/new)
 
-We will acknowledge your report within 48 hours and aim to release a fix within 7 days for critical issues.
+We aim to acknowledge your report within 48 hours and to release a fix within 7 days for critical issues.
 
 ## Scope
 
 This policy covers:
-- The `bastion-scan` npm package
-- The `bastion-shared` npm package
+- The `bastion-scan` npm package (the published CLI; the `@bastion/shared` package is private and bundled into it)
 - The Bastion web application (bastion.wiki)
 - The Bastion GitHub Action
 
@@ -27,4 +26,5 @@ We follow coordinated disclosure. Please do not open public issues for security 
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x   | Yes       |
+| 0.2.x   | Yes       |
+| 0.1.x   | No — upgrade to 0.2.x |
